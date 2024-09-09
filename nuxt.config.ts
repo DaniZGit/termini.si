@@ -1,0 +1,61 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  devtools: { enabled: true },
+  modules: [
+    "@nuxtjs/tailwindcss",
+    "@vueuse/nuxt",
+    "nuxt-icon",
+    "nuxt-directus-next",
+    "@nuxt/fonts",
+    "@nuxt/image",
+    "@pinia/nuxt",
+    "@pinia-plugin-persistedstate/nuxt",
+    "@unlok-co/nuxt-stripe",
+  ],
+  runtimeConfig: {
+    public: {
+      directus: {
+        staticToken: "fve63-QeTqGgRjSnb-xy1zKg51PbQG6P",
+      },
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+    },
+  },
+  directus: {
+    moduleConfig: {
+      readMeQuery: {
+        fields: [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "tokens",
+          "plans.id",
+          "plans.total_reservations",
+          "plans.plans_id.id",
+          "plans.plans_id.title",
+          "plans.plans_id.institution.id",
+          "plans.plans_id.sport.id",
+        ],
+      },
+    },
+  },
+  stripe: {
+    // Server
+    server: {
+      key: "sk_test_51LUUJEEaQ0gJxeyLABg1s1Q0Wx02qoHHmQIJJ32yX8gF5XStdrPgZfJ03wIG9J3YOpCDivi5zXAR22SlU5N6ppAz00C55fuEae",
+      options: {
+        // your api options override for stripe server side
+        // https://github.com/stripe/stripe-node?tab=readme-ov-file#configuration
+      },
+      // CLIENT
+    },
+    client: {
+      key: "pk_test_51LUUJEEaQ0gJxeyLzRn1hMWzF6vPkmOLYTVdDGCGaKwjaIrFlpK2q8jsQL4z4mYlV83sqik40vlVMJDwT9Ueuk2600KKZOVFI6",
+      // your api options override for stripe client side https://stripe.com/docs/js/initializing#init_stripe_js-options
+      options: {},
+    },
+  },
+  build: {
+    transpile: ["@vuepic/vue-datepicker"],
+  },
+});

@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* https://stackoverflow.com/questions/2781549/removing-input-background-colour-for-chrome-autocomplete */
+  .autofill-text:-webkit-autofill {
+    -webkit-text-fill-color: #2196f3;
+    background-color: #ffffff;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .link {
+    @apply text-accent-lightBlue hover:text-secondary font-semibold underline underline-offset-2;
+  }
+
+  .header-link {
+    @apply text-secondary border-2 border-secondary rounded-full text-center py-1 px-4 hover:bg-secondary hover:text-neutral-white transition-colors;
+  }
+
+  .input {
+    @apply text-secondary font-semibold border-b-2 border-primary placeholder-neutral-gray outline-none autofill-text;
+  }
+
+  .checkbox {
+    @apply appearance-none w-4 h-4 text-primary border-2 border-secondary rounded-sm checked:bg-secondary flex items-baseline justify-center;
+  }
+
+  .checkbox:checked::before {
+    content: "";
+    @apply absolute block w-1.5 h-2.5 border-neutral-white border-b-2 border-r-2;
+    @apply rotate-45;
+  }
+}

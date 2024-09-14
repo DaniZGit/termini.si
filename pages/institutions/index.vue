@@ -2,7 +2,7 @@
   <div class="bg-neutral-white pb-16">
     <div>
       <div class="text-center px-4 py-4">
-        <h1 class="text-3xl font-semibold text-secondary">Športne ustanove</h1>
+        <h1 class="text-3xl font-semibold text-secondary">Ustanove</h1>
       </div>
 
       <div class="px-4 pb-4">
@@ -84,23 +84,11 @@
           "address",
           "phone",
           "thumbnail.*",
-          "courts.id",
-          "courts.sport.*",
+          "services.type",
         ],
         filter: {
           status: {
             _eq: "published",
-          },
-          courts: {
-            sport: {
-              id: checkedSports.value?.length
-                ? {
-                    _in: checkedSports.value,
-                  }
-                : {
-                    _gt: 0,
-                  },
-            },
           },
           city: {
             id: checkedCities.value?.length
@@ -134,17 +122,6 @@
         filter: {
           status: {
             _eq: "published",
-          },
-          courts: {
-            sport: {
-              id: checkedSports.value?.length
-                ? {
-                    _in: checkedSports.value,
-                  }
-                : {
-                    _gt: 0,
-                  },
-            },
           },
           city: {
             id: checkedCities.value?.length

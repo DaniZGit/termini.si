@@ -14,9 +14,6 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      directus: {
-        staticToken: "fve63-QeTqGgRjSnb-xy1zKg51PbQG6P",
-      },
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
     },
   },

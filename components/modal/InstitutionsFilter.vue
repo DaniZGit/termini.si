@@ -40,20 +40,6 @@
                   <option value="-title">Naslovu padajoče</option>
                 </select>
               </div>
-              <div>
-                <h3 class="text-primary text-lg font-bold">Šport</h3>
-                <div class="flex flex-col gap-y-2 pl-2">
-                  <div v-for="sport in sports" :key="sport.id">
-                    <UiFormCheckbox
-                      v-model="checkedSports"
-                      :id="`sport-${sport.id}`"
-                      name="sports"
-                      :value="sport.id"
-                      :label="sport.title"
-                    ></UiFormCheckbox>
-                  </div>
-                </div>
-              </div>
 
               <div>
                 <h3 class="text-primary text-lg font-bold">Mesto</h3>
@@ -161,10 +147,8 @@
 <script lang="ts" setup>
   import { type PropType } from "vue";
   import type { ApiCity } from "~/types/city";
-  import type { ApiSport } from "~/types/sport";
   import { GoogleMap, AdvancedMarker, CustomControl } from "vue3-google-map";
   import type { ApiInstitution } from "~/types/institution";
-  import Button from "../ui/Button.vue";
   import type { InstitutionsFilter } from "~/types/misc";
   import type { LocationQueryValue } from "vue-router";
 
@@ -189,38 +173,6 @@
   const emit = defineEmits<{
     filter: [filters: InstitutionsFilter];
   }>();
-
-  // FILTER TYPE
-  const {
-    data: sports,
-    error,
-    status: fetchingSports,
-  } = await useLazyAsyncData<ApiSport[]>("sportsCollection", () =>
-    readItems("sports", {
-      fields: ["id", "title", "slug"],
-      filter: {
-        _and: [
-          {
-            courts: {
-              institution: {
-                _null: false,
-              },
-            },
-          },
-          {
-            courts: {
-              institution: {
-                status: {
-                  _eq: "published",
-                },
-              },
-            },
-          },
-        ],
-      },
-      sort: "title",
-    })
-  );
 
   const {
     data: cities,
@@ -249,14 +201,6 @@
     })
   );
 
-  const getSportsQuery = () => {
-    return typeof route.query.sports === "object"
-      ? route.query.sports
-      : route.query.sports
-      ? [route.query.sports]
-      : [];
-  };
-
   const getCitiesQuery = () => {
     return typeof route.query.cities === "object"
       ? route.query.cities
@@ -270,22 +214,18 @@
   };
 
   const sort = ref<string>(getSortQuery());
-  const checkedSports = ref<LocationQueryValue[] | null>(getSportsQuery());
   const checkedCities = ref<LocationQueryValue[] | null>(getCitiesQuery());
   const prevSort = ref<string>(getSortQuery());
-  const prevCheckedSports = ref<LocationQueryValue[] | null>(getSportsQuery());
   const prevCheckedCities = ref<LocationQueryValue[] | null>(getCitiesQuery());
   const onFilter = () => {
     emit("filter", {
       sort: sort.value,
-      checkedSports: checkedSports.value,
       checkedCities: checkedCities.value,
     });
 
     visible.value = false;
 
     prevSort.value = sort.value;
-    prevCheckedSports.value = checkedSports.value;
     prevCheckedCities.value = checkedCities.value;
   };
 
@@ -294,11 +234,9 @@
     () => route.query,
     () => {
       sort.value = getSortQuery();
-      checkedSports.value = getSportsQuery();
       checkedCities.value = getCitiesQuery();
 
       prevSort.value = sort.value;
-      prevCheckedSports.value = checkedSports.value;
       prevCheckedCities.value = checkedCities.value;
     }
   );
@@ -309,7 +247,6 @@
     // reset filter values
     if (props.type == "filter") {
       sort.value = prevSort.value;
-      checkedSports.value = prevCheckedSports.value;
       checkedCities.value = prevCheckedCities.value;
     }
   };

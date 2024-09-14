@@ -57,7 +57,7 @@
           {{ institution.website }}
         </NuxtLink>
       </div>
-      <div
+      <!-- <div
         v-if="institution && getInstitutionSports(institution)"
         class="flex gap-x-2"
       >
@@ -79,15 +79,36 @@
             </NuxtLink>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div v-if="institution?.content" class="px-4 py-4">
       <div v-html="institution?.content" class="text-neutral-darkGray"></div>
     </div>
 
-    <!-- Plans -->
+    <!-- Services -->
     <div class="px-4 py-4 flex flex-col">
+      <h2 class="text-2xl font-semibold text-secondary">Storitve</h2>
+      <div>
+        <div
+          v-for="service in institution?.services"
+          :key="service.id"
+          class="flex"
+        >
+          <Icon
+            name="i-ic:outline-calendar-month"
+            size="32"
+            class="text-primary"
+          />
+          <h4 class="text-lg font-semibold text-secondary">
+            {{ service.type }}
+          </h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plans -->
+    <!-- <div class="px-4 py-4 flex flex-col">
       <div class="flex justify-between" @click="planToggle = !planToggle">
         <h2 class="text-2xl font-semibold text-secondary">Paketi</h2>
         <div>
@@ -119,10 +140,10 @@
           @click="onPlanClick(plan)"
         ></ItemPlan>
       </div>
-    </div>
+    </div> -->
 
     <!-- Courts -->
-    <div class="py-4 flex flex-col gap-y-2">
+    <!-- <div class="py-4 flex flex-col gap-y-2">
       <div class="flex items-center">
         <h2 class="px-4 text-2xl font-semibold text-secondary">Igrišča</h2>
         <div>
@@ -136,7 +157,6 @@
           ></VueDatePicker>
         </div>
       </div>
-      <!-- Sports tab -->
       <div
         v-if="institution && getInstitutionSports(institution)"
         class="flex flex-nowrap overflow-x-auto border-y-2 border-primary no-scrollbar"
@@ -165,9 +185,7 @@
         </div>
       </div>
 
-      <!-- Courts Time Slots/Reservations -->
       <div v-if="courts?.length" class="flex gap-x-1">
-        <!-- Time Slots timings on the Left side -->
         <div>
           <div
             class="grid grid-flow-row overflow-auto border-r-2 border-secondary"
@@ -194,7 +212,6 @@
             </div>
           </div>
         </div>
-        <!-- Time Slots -->
         <div
           class="grid grid-flow-col gap-y-4 overflow-auto"
           :style="`grid-auto-columns: ${timeSlotCellColWidth}px;`"
@@ -238,10 +255,10 @@
           class="text-neutral-darkGray"
         />
       </div>
-    </div>
+    </div> -->
 
     <!-- Cart -->
-    <div
+    <!-- <div
       v-show="cartStore.slots.length"
       class="fixed bottom-0 left-0 right-0 flex justify-center"
     >
@@ -261,10 +278,10 @@
           </span>
         </UiButton>
       </UiShadowPanel>
-    </div>
+    </div> -->
 
     <!-- Cart Modal -->
-    <ModalCart v-model:visible="showCartModal"></ModalCart>
+    <!-- <ModalCart v-model:visible="showCartModal"></ModalCart> -->
 
     <!-- Login Required Modal -->
     <ModalLoginRequired
@@ -272,10 +289,10 @@
     ></ModalLoginRequired>
 
     <!-- Plan Detail Modal -->
-    <ModalPlanDetail
+    <!-- <ModalPlanDetail
       v-model:visible="showPlanDetailModal"
       :plan="selectedPlan"
-    ></ModalPlanDetail>
+    ></ModalPlanDetail> -->
   </div>
 </template>
 
@@ -306,7 +323,7 @@
   } = await useAsyncData<ApiInstitution>(
     "institution",
     () =>
-      readSingleton("institutions", {
+      readItems("institutions", {
         fields: [
           "id",
           "title",
@@ -316,38 +333,40 @@
           "phone",
           "website",
           "images.directus_files_id.*",
-          "courts.sport.id",
-          "courts.sport.title",
-          "courts.sport.image.*",
-          "total_reservations_per_day",
-          "days_in_advance_to_reserve",
-          "plans.id",
-          "plans.title",
-          "plans.total_reservations",
-          "plans.total_reservations_per_day",
-          "plans.days_in_advance_to_reserve",
-          "plans.buyable",
-          "plans.price",
-          "plans.seasonal",
-          "plans.available_from",
-          "plans.available_to",
-          "plans.note",
-          "plans.users.*",
+          "services.*",
+          // "courts.sport.id",
+          // "courts.sport.title",
+          // "courts.sport.image.*",
+          // "total_reservations_per_day",
+          // "days_in_advance_to_reserve",
+          // "plans.id",
+          // "plans.title",
+          // "plans.total_reservations",
+          // "plans.total_reservations_per_day",
+          // "plans.days_in_advance_to_reserve",
+          // "plans.buyable",
+          // "plans.price",
+          // "plans.seasonal",
+          // "plans.available_from",
+          // "plans.available_to",
+          // "plans.note",
+          // "plans.users.*",
         ],
         filter: {
           slug: {
             _icontains: route.params.slug ?? "",
           },
         },
-        deep: {
-          plans: {
-            users: {
-              _filter: {
-                directus_users_id: user.value?.id ?? "",
-              },
-            },
-          },
-        },
+        // deep: {
+        //   plans: {
+        //     users: {
+        //       _filter: {
+        //         directus_users_id: user.value?.id ?? "",
+        //       },
+        //     },
+        //   },
+        // },
+        limit: 1,
       }),
     {
       transform: (data) => {
@@ -358,12 +377,12 @@
 
   // plans
   const planToggle = ref(false);
-  const defaultPlan = computed(() => ({
-    title: "Privzeto",
-    total_reservations_per_day: institution.value?.total_reservations_per_day,
-    days_in_advance_to_reserve: institution.value?.days_in_advance_to_reserve,
-    note: "Ta paket imajo vsi uporabniki in vsebuej privzete vrednost za število rezervacij na dan in za koliko dni vnaprej lahko navadni uporabnik rezervira",
-  }));
+  // const defaultPlan = computed(() => ({
+  //   title: "Privzeto",
+  //   total_reservations_per_day: institution.value?.total_reservations_per_day,
+  //   days_in_advance_to_reserve: institution.value?.days_in_advance_to_reserve,
+  //   note: "Ta paket imajo vsi uporabniki in vsebuej privzete vrednost za število rezervacij na dan in za koliko dni vnaprej lahko navadni uporabnik rezervira",
+  // }));
 
   const showPlanDetailModal = ref(false);
   const selectedPlan = ref<Partial<ApiPlan> | null>(null);
@@ -442,10 +461,12 @@
       }),
     {
       watch: [selectedSport, selectedDate],
+      immediate: false,
     }
   );
 
   onMounted(async () => {
+    return;
     // if looking at different institution, clear the current cart
     if (
       cartStore.slots.length &&

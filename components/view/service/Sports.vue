@@ -1,14 +1,5 @@
 <template>
   <div class="bg-neutral-white">
-    <div class="text-center px-4 py-4">
-      <h1 class="text-3xl font-semibold text-secondary">
-        {{ service.institution.title }}
-      </h1>
-      <h2 class="text-primary font-semibold text-xl">
-        ( {{ getServiceTypeTitle(service) }} )
-      </h2>
-    </div>
-
     <div v-if="error">error: {{ error }}</div>
 
     <!-- Schedule -->
@@ -29,7 +20,6 @@
   import { format } from "date-fns";
   import type { PropType } from "vue";
   import type { Timetable } from "~/types/misc";
-  import type { ApiSchedule, ApiSlot } from "~/types/schedule";
   import type {
     ApiService,
     ApiServiceTypeSports,

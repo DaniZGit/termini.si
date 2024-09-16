@@ -7,6 +7,8 @@ export type ApiService = {
   id: string;
   display_type: "daily" | "weekly";
   institution: ApiInstitution;
+  total_reservations_per_day: number;
+  days_in_advance_to_reserve: number;
   plans: ApiPlan[] | null;
 } & (
   | ApiServiceTypeSports

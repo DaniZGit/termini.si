@@ -1,6 +1,20 @@
 <template>
   <div class="h-full">
     <template v-if="service">
+      <div class="text-center px-4 py-4">
+        <h1 class="text-3xl font-semibold text-secondary">
+          {{ service.institution.title }}
+        </h1>
+        <h2 class="text-primary font-semibold text-xl">
+          ( {{ getServiceTypeTitle(service) }} )
+        </h2>
+      </div>
+
+      <!-- Plans -->
+      <div class="px-4 py-4 flex flex-col">
+        <ViewServicePlans :service="service"></ViewServicePlans>
+      </div>
+
       <ViewServiceSports
         v-if="service.type == 'sports'"
         :service="service"
@@ -18,7 +32,7 @@
         :service="service"
       ></ViewServiceWellness>
       <div v-else>
-        <h1>This Service type is has not been handled yet!</h1>
+        <h1>This Service type has not been handled yet!</h1>
       </div>
     </template>
   </div>
@@ -39,6 +53,16 @@
       "institution.id",
       "institution.slug",
       "institution.title",
+      "total_reservations_per_day",
+      "days_in_advance_to_reserve",
+      "plans.id",
+      "plans.title",
+      "plans.total_reservations",
+      "plans.total_reservations_per_day",
+      "plans.days_in_advance_to_reserve",
+      "plans.buyable",
+      "plans.price",
+      "plans.note",
     ];
 
     switch (serviceType) {

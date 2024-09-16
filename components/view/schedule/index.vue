@@ -7,11 +7,7 @@
         <h4 class="text-2xl font-medium text-secondary">
           Nalaganje terminov...
         </h4>
-        <Icon
-          name="i-svg-spinners:blocks-shuffle-3"
-          size="64"
-          class="text-primary flex m-auto"
-        />
+        <UiLoader></UiLoader>
       </div>
     </div>
     <div v-else-if="slotsExist" class="flex gap-x-1">

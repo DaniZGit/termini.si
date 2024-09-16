@@ -96,7 +96,7 @@
   });
 
   const props = defineProps({
-    plan: Object as PropType<Partial<ApiPlan>>,
+    plan: Object as PropType<Partial<ApiPlan> | null>,
   });
 
   const userOwnsPlan = () => {

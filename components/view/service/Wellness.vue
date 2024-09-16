@@ -1,14 +1,5 @@
 <template>
   <div class="bg-neutral-white h-full">
-    <div class="text-center px-4 py-4">
-      <h1 class="text-3xl font-semibold text-secondary">
-        {{ service?.institution.title }}
-      </h1>
-      <h2 class="text-primary font-semibold text-xl">
-        ( {{ getServiceTypeTitle(service) }} )
-      </h2>
-    </div>
-
     <div v-if="error">error: {{ error }}</div>
 
     <!-- Schedule -->
@@ -36,7 +27,6 @@
     ApiWellness,
   } from "~/types/service";
 
-  const route = useRoute();
   const { readItems } = useDirectusItems();
   const props = defineProps({
     service: {

@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-neutral-white">
+  <div class="bg-neutral-white h-full">
     <div class="text-center px-4 py-4">
       <h1 class="text-3xl font-semibold text-secondary">
-        {{ service.institution.title }}
+        {{ service?.institution.title }}
       </h1>
       <h2 class="text-primary font-semibold text-xl">
         ( {{ getServiceTypeTitle(service) }} )
@@ -12,32 +12,27 @@
     <div v-if="error">error: {{ error }}</div>
 
     <!-- Schedule -->
-    <div class="py-4 flex flex-col gap-y-2">
-      <div class="flex items-center">
-        <h2 class="px-4 text-2xl font-semibold text-secondary">Termini</h2>
-        <div>
-          <VueDatePicker
-            v-model="selectedDate"
-            :enable-time-picker="false"
-            :min-date="new Date()"
-            :clearable="false"
-            :format="datepickerFormat"
-            :auto-apply="true"
-          ></VueDatePicker>
-        </div>
-      </div>
-      <ViewSchedule :schedules="getSchedules"></ViewSchedule>
+    <div v-if="service" class="py-4 flex flex-col gap-y-2 h-full">
+      <UiDatePicker
+        v-model="selectedDate"
+        :display-type="service.display_type"
+      ></UiDatePicker>
+      <ViewSchedule
+        v-model:timetables="getTimetables"
+        :status="wellnessStatus"
+      ></ViewSchedule>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+  import { format } from "date-fns";
+  import { sl } from "date-fns/locale";
   import type { PropType } from "vue";
-  import type { ApiSchedule } from "~/types/schedule";
+  import type { Timetable } from "~/types/misc";
   import type {
     ApiService,
     ApiServiceTypeWellness,
-    ApiSportCourt,
     ApiWellness,
   } from "~/types/service";
 
@@ -50,22 +45,40 @@
     },
   });
 
-  // date picker
-  const selectedDate = ref(new Date());
-  const formattedDateValue = useDateFormat(selectedDate, "YYYY-MM-DD");
-  const datepickerFormat = (date: Date) => {
-    const formattedDate = useDateFormat(date, "DD. MM. YYYY (dddd)", {
-      locales: "sl",
-    });
+  // datepicker stuff
+  const selectedDate = ref<Date | [string, string]>(new Date());
+  const getDatesFilter = computed(() => {
+    const filter: Record<string, any> = {};
 
-    return formattedDate.value;
-  };
+    if (Array.isArray(selectedDate.value)) {
+      // as a week picker
+      filter["_and"] = [
+        {
+          date: {
+            _gte: useDateFormat(selectedDate.value[0], "YYYY-MM-DD").value,
+          },
+        },
+        {
+          date: {
+            _lte: useDateFormat(selectedDate.value[1], "YYYY-MM-DD").value,
+          },
+        },
+      ];
+    } else {
+      // as a single date picker
+      filter["date"] = {
+        _eq: useDateFormat(selectedDate.value, "YYYY-MM-DD").value,
+      };
+    }
+
+    return filter;
+  });
 
   // wellness data request
   const {
     data: wellness,
     error,
-    status,
+    status: wellnessStatus,
   } = await useLazyAsyncData<ApiWellness[]>(
     "wellness",
     () =>
@@ -85,44 +98,62 @@
         ],
         filter: {
           service: {
-            institution: {
-              slug: {
-                _icontains: route.params.slug ?? "",
-              },
-            },
-            type: {
-              _icontains: route.params.type ?? "",
-            },
+            id: props.service?.id,
           },
         },
         deep: {
           schedules: {
             dates: {
-              _filter: {
-                date: {
-                  _eq: formattedDateValue.value,
-                },
-              },
-              _limit: 1,
+              _filter: getDatesFilter.value,
             },
           },
         },
       }),
     {
       watch: [selectedDate],
+      immediate: false,
     }
   );
 
-  const getSchedules = computed(() => {
-    if (!wellness.value) return {};
+  const getTimetables = computed(() => {
+    const timetables: Timetable[] = [];
 
-    const titleToScheduleMap: Record<string, ApiSchedule> = {};
-    wellness.value.forEach((wellns) => {
-      if (wellns.schedules?.length)
-        titleToScheduleMap[wellns.title] = wellns.schedules[0];
-    });
+    if (Array.isArray(selectedDate.value)) {
+      wellness.value?.forEach((wellns) => {
+        if (!wellns.schedules?.length) return;
 
-    return titleToScheduleMap;
+        wellns.schedules.forEach((schedule) => {
+          schedule.dates?.forEach((date) => {
+            if (date.slots?.length) {
+              timetables.push({
+                title: `${wellns.title}`,
+                subtitle: `${format(date.date, "(EEEE)", {
+                  locale: sl,
+                }).toString()}`,
+                date: date.date,
+                slots: date.slots,
+              });
+            }
+          });
+        });
+      });
+    } else {
+      wellness.value?.forEach((wellns) => {
+        if (
+          wellns.schedules?.length &&
+          wellns.schedules[0].dates?.length &&
+          wellns.schedules[0].dates[0].slots?.length
+        ) {
+          timetables.push({
+            title: `${wellns.title}`,
+            date: wellns.schedules[0].dates[0].date,
+            slots: wellns.schedules[0].dates[0].slots,
+          });
+        }
+      });
+    }
+
+    return timetables;
   });
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <template v-if="service">
       <ViewServiceSports
         v-if="service.type == 'sports'"

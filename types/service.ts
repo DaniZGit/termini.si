@@ -5,6 +5,7 @@ import type { ApiSport } from "./sport";
 
 export type ApiService = {
   id: string;
+  display_type: "daily" | "weekly";
   institution: ApiInstitution;
   plans: ApiPlan[] | null;
 } & (

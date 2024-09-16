@@ -1,7 +1,7 @@
 import type { ApiService } from "~/types/service";
 
-export default (service: ApiService) => {
-  switch (service.type) {
+export default (service: ApiService | null) => {
+  switch (service?.type) {
     case "sports":
       return "Šport";
     case "hairdressing":

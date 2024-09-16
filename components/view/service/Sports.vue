@@ -12,28 +12,24 @@
     <div v-if="error">error: {{ error }}</div>
 
     <!-- Schedule -->
-    <div class="py-4 flex flex-col gap-y-2">
-      <div class="flex items-center">
-        <h2 class="px-4 text-2xl font-semibold text-secondary">Termini</h2>
-        <div>
-          <VueDatePicker
-            v-model="selectedDate"
-            :enable-time-picker="false"
-            :min-date="new Date()"
-            :clearable="false"
-            :format="datepickerFormat"
-            :auto-apply="true"
-          ></VueDatePicker>
-        </div>
-      </div>
-      <ViewSchedule :schedules="getSchedules"></ViewSchedule>
+    <div v-if="service" class="py-4 flex flex-col gap-y-2">
+      <UiDatePicker
+        v-model="selectedDate"
+        :display-type="service.display_type"
+      ></UiDatePicker>
+      <ViewSchedule
+        :timetables="getTimetables"
+        :status="sportCourtsStatus"
+      ></ViewSchedule>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+  import { format } from "date-fns";
   import type { PropType } from "vue";
-  import type { ApiSchedule } from "~/types/schedule";
+  import type { Timetable } from "~/types/misc";
+  import type { ApiSchedule, ApiSlot } from "~/types/schedule";
   import type {
     ApiService,
     ApiServiceTypeSports,
@@ -49,22 +45,40 @@
     },
   });
 
-  // date picker
-  const selectedDate = ref(new Date());
-  const formattedDateValue = useDateFormat(selectedDate, "YYYY-MM-DD");
-  const datepickerFormat = (date: Date) => {
-    const formattedDate = useDateFormat(date, "DD. MM. YYYY (dddd)", {
-      locales: "sl",
-    });
+  // datepicker stuff
+  const selectedDate = ref<Date | [string, string]>(new Date());
+  const getDatesFilter = computed(() => {
+    const filter: Record<string, any> = {};
 
-    return formattedDate.value;
-  };
+    if (Array.isArray(selectedDate.value)) {
+      // as a week picker
+      filter["_and"] = [
+        {
+          date: {
+            _gte: useDateFormat(selectedDate.value[0], "YYYY-MM-DD").value,
+          },
+        },
+        {
+          date: {
+            _lte: useDateFormat(selectedDate.value[1], "YYYY-MM-DD").value,
+          },
+        },
+      ];
+    } else {
+      // as a single date picker
+      filter["date"] = {
+        _eq: useDateFormat(selectedDate.value, "YYYY-MM-DD").value,
+      };
+    }
+
+    return filter;
+  });
 
   // sport_courts data request
   const {
     data: sportCourts,
     error,
-    status,
+    status: sportCourtsStatus,
   } = await useLazyAsyncData<ApiSportCourt[]>(
     "sport_courts",
     () =>
@@ -97,31 +111,54 @@
         deep: {
           schedules: {
             dates: {
-              _filter: {
-                date: {
-                  _eq: formattedDateValue.value,
-                },
-              },
-              _limit: 1,
+              _filter: getDatesFilter.value,
             },
           },
         },
       }),
     {
       watch: [selectedDate],
+      immediate: false,
     }
   );
 
-  const getSchedules = computed(() => {
-    if (!sportCourts.value) return {};
+  const getTimetables = computed(() => {
+    const timetables: Timetable[] = [];
 
-    const titleToScheduleMap: Record<string, ApiSchedule> = {};
-    sportCourts.value.forEach((sportCourt) => {
-      if (sportCourt.schedules?.length)
-        titleToScheduleMap[sportCourt.title] = sportCourt.schedules[0];
-    });
+    if (Array.isArray(selectedDate.value)) {
+      sportCourts.value?.forEach((sportCourt) => {
+        if (!sportCourt.schedules?.length) return;
 
-    return titleToScheduleMap;
+        sportCourt.schedules.forEach((schedule) => {
+          schedule.dates?.forEach((date) => {
+            if (date.slots?.length) {
+              timetables.push({
+                title: `${sportCourt.title}`,
+                subtitle: `${format(date.date, "dd. M. yyyy").toString()}`,
+                date: date.date,
+                slots: date.slots,
+              });
+            }
+          });
+        });
+      });
+    } else {
+      sportCourts.value?.forEach((sportCourt) => {
+        if (
+          sportCourt.schedules?.length &&
+          sportCourt.schedules[0].dates?.length &&
+          sportCourt.schedules[0].dates[0].slots?.length
+        ) {
+          timetables.push({
+            title: `${sportCourt.title}`,
+            date: sportCourt.schedules[0].dates[0].date,
+            slots: sportCourt.schedules[0].dates[0].slots,
+          });
+        }
+      });
+    }
+
+    return timetables;
   });
 </script>
 

@@ -1,69 +1,90 @@
 <template>
   <div>
-    <div>
-      <div v-if="slotsExist" class="flex gap-x-1">
-        <div>
-          <div
-            class="grid grid-flow-row overflow-auto border-r-2 border-secondary"
-          >
-            <Icon
-              name="i-ic:baseline-access-time"
-              size="26"
-              class="m-auto text-secondary"
-              :style="`height: ${slotHeaderRowHeight}px;`"
-            />
-            <div
-              v-for="i in getTimestamps()"
-              class="flex justify-center items-start px-2 text-neutral-darkGray font-medium"
-              :style="`height: ${slotCellRowHeight}px;`"
-            >
-              <span class="text-center text-base -translate-y-3">
-                {{ minsToTime(getMinTime() + i * getMinSlotDuration()) }}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="grid grid-flow-col gap-y-4 overflow-auto"
-          :style="`grid-auto-columns: ${slotCellColWidth}px;`"
-        >
-          <div
-            v-for="(schedule, title) in schedules"
-            :key="schedule.id"
-            class="flex flex-col justify-start text-center"
-          >
-            <div
-              class="flex justify-center items-center"
-              :style="`height: ${slotHeaderRowHeight}px;`"
-            >
-              <h4 class="font-semibold text-secondary">
-                {{ title }}
-              </h4>
-            </div>
-            <div class="grow relative">
-              <ItemSlot
-                v-for="(slot, i) in getSortedSlots(schedule)"
-                :key="slot.id"
-                :slot="slot"
-                :top-offset="getSlotTopOffset(slot)"
-                :height="getSlotHeight(slot)"
-                @selected="onSlotSelected"
-                @unselected="onSlotUnselected"
-              ></ItemSlot>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="text-center">
-        <h4 class="text-lg font-medium text-neutral-darkGray">
-          Trenutno ni terminov za izbrani datum
+    <div v-if="status == 'idle' || status == 'pending'">
+      <div
+        class="w-full h-full flex flex-col items-center justify-center gap-y-8 mt-32 px-4"
+      >
+        <h4 class="text-2xl font-medium text-secondary">
+          Nalaganje terminov...
         </h4>
         <Icon
-          name="i-ic:baseline-calendar-month"
-          size="32"
-          class="text-neutral-darkGray"
+          name="i-svg-spinners:blocks-shuffle-3"
+          size="64"
+          class="text-primary flex m-auto"
         />
       </div>
+    </div>
+    <div v-else-if="slotsExist" class="flex gap-x-1">
+      <div>
+        <div
+          class="grid grid-flow-row overflow-auto border-r-2 border-secondary"
+        >
+          <Icon
+            name="i-ic:baseline-access-time"
+            size="26"
+            class="m-auto text-secondary"
+            :style="`height: ${slotHeaderRowHeight}px;`"
+          />
+          <div
+            v-for="i in getTimestamps()"
+            class="flex justify-center items-start px-2 text-neutral-darkGray font-medium"
+            :style="`height: ${slotCellRowHeight}px;`"
+          >
+            <span class="text-center text-base -translate-y-3">
+              {{ minsToTime(getMinTime() + i * getMinSlotDuration()) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="grid grid-flow-col gap-y-4 overflow-auto"
+        :style="`grid-auto-columns: ${slotCellColWidth}px;`"
+      >
+        <div
+          v-for="timetable in getSortedTimetables"
+          :key="timetable.title"
+          class="flex flex-col justify-start text-center"
+        >
+          <div
+            class="flex flex-col justify-center items-center text-center"
+            :style="`height: ${slotHeaderRowHeight}px;`"
+          >
+            <h4 class="font-semibold text-secondary whitespace-pre-line">
+              {{ timetable.title }}
+            </h4>
+            <h5
+              v-if="timetable.subtitle"
+              class="text-sm font-semibold text-secondary whitespace-pre-line"
+            >
+              {{ timetable.subtitle }}
+            </h5>
+          </div>
+          <div class="grow relative">
+            <ItemSlot
+              v-for="(slot, i) in timetable.slots"
+              :key="slot.id"
+              :slot="slot"
+              :top-offset="getSlotTopOffset(slot)"
+              :height="getSlotHeight(slot)"
+              @selected="onSlotSelected"
+              @unselected="onSlotUnselected"
+            ></ItemSlot>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      v-else
+      class="text-center flex flex-col items-center gap-y-8 mt-32 px-4"
+    >
+      <h4 class="text-2xl font-medium text-neutral-darkGray">
+        Trenutno ni terminov za izbrani datum
+      </h4>
+      <Icon
+        name="i-ic:baseline-calendar-month"
+        size="64"
+        class="text-neutral-darkGray"
+      />
     </div>
 
     <!-- Login Required Modal -->
@@ -74,12 +95,21 @@
 </template>
 
 <script lang="ts" setup>
+  import type { AsyncDataRequestStatus } from "#app";
+  import type { PropType } from "vue";
+  import type { Timetable } from "~/types/misc";
   import type { ApiSchedule, ApiSlot } from "~/types/schedule";
 
   const { user } = useDirectusAuth();
-  const schedules = defineModel("schedules", {
-    type: Object as PropType<Record<string, ApiSchedule>>,
+  const timetables = defineModel("timetables", {
+    type: Array as PropType<Array<Timetable>>,
     required: true,
+  });
+
+  const props = defineProps({
+    status: {
+      type: String as PropType<AsyncDataRequestStatus>,
+    },
   });
 
   onMounted(async () => {
@@ -97,15 +127,14 @@
 
     for await (const item of subscription) {
       console.log("slot update", item);
-      if (!item.data || !schedules.value) continue;
+      if (!item.data || !timetables.value) continue;
 
       const changedSlots = item.data as ApiSlot[];
       changedSlots.forEach((changedSlot) => {
-        Object.entries(schedules.value).forEach(([title, schedule]) => {
-          const date = schedule.dates?.find(
-            (date) => date.id == changedSlot.date.id
+        timetables.value.forEach((timetable) => {
+          const slot = timetable.slots?.find(
+            (slot) => slot.id == changedSlot.id
           );
-          const slot = date?.slots?.find((slot) => slot.id == changedSlot.id);
           if (slot) slot.available = changedSlot.available;
         });
       });
@@ -113,15 +142,12 @@
   });
 
   const slotsExist = computed(() => {
-    if (!schedules.value) return false;
-    const slotsAmount = Object.entries(schedules.value).reduce(
-      (sum, [title, schedule]) => {
-        if (!schedule.dates?.length || !schedule.dates[0].slots?.length)
-          return sum;
-        return sum + schedule.dates[0].slots.length;
-      },
-      0
-    );
+    if (!timetables.value) return false;
+
+    const slotsAmount = timetables.value.reduce((sum, timetable) => {
+      if (!timetable.slots?.length) return sum;
+      return sum + timetable.slots.length;
+    }, 0);
 
     return slotsAmount > 0;
   });
@@ -156,10 +182,10 @@
   const getMinTime = () => {
     let minTime = 24 * 60; // in minutes
 
-    Object.entries(schedules.value).forEach(([title, schedule]) => {
-      if (!schedule.dates?.length) return;
+    timetables.value.forEach((timetable) => {
+      if (!timetable.slots?.length) return;
 
-      schedule.dates[0].slots?.forEach((slot) => {
+      timetable.slots.forEach((slot) => {
         const slotStartTimeMins = timeToMins(slot.start_time);
         if (slotStartTimeMins < minTime) minTime = slotStartTimeMins;
       });
@@ -172,10 +198,10 @@
   const getMaxTime = () => {
     let maxTime = 0; // in minutes
 
-    Object.entries(schedules.value).forEach(([title, schedule]) => {
-      if (!schedule.dates?.length) return;
+    timetables.value.forEach((timetable) => {
+      if (!timetable.slots?.length) return;
 
-      schedule.dates[0].slots?.forEach((slot) => {
+      timetable.slots.forEach((slot) => {
         const slotStartTimeMins = timeToMins(slot.end_time);
         if (slotStartTimeMins > maxTime) maxTime = slotStartTimeMins;
       });
@@ -188,10 +214,10 @@
   const getMinSlotDuration = () => {
     let minDuration = 24 * 60; // 24h -> mins
 
-    Object.entries(schedules.value).forEach(([title, schedule]) => {
-      if (!schedule.dates?.length) return;
+    timetables.value.forEach((timetable) => {
+      if (!timetable.slots?.length) return;
 
-      schedule.dates[0].slots?.forEach((slot) => {
+      timetable.slots.forEach((slot) => {
         const slotStartTimeMins = timeToMins(slot.start_time);
         const slotEndTimeMins = timeToMins(slot.end_time);
         if (slotEndTimeMins - slotStartTimeMins < minDuration)
@@ -231,6 +257,16 @@
 
     return topOffset;
   };
+
+  const getSortedTimetables = computed(() => {
+    return timetables.value.sort((a, b) => {
+      if (a.date < b.date) return -1;
+      else if (a.date > b.date) return 1;
+      else if (a.title < b.title) return -1;
+      else if (a.title > b.title) return 1;
+      return 0;
+    });
+  });
 
   const getSortedSlots = (schedule: ApiSchedule) => {
     if (!schedule.dates?.length) return;

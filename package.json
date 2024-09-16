@@ -19,6 +19,7 @@
     "@vuepic/vue-datepicker": "^8.8.0",
     "@vueuse/core": "^10.10.0",
     "@vueuse/nuxt": "^10.10.0",
+    "date-fns": "^4.0.0",
     "nuxt": "^3.12.1",
     "nuxt-icon": "^0.6.10",
     "swiper": "^11.1.4",

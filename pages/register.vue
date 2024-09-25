@@ -94,9 +94,6 @@
 
   const config = useRuntimeConfig();
   const router = useRouter();
-  const { createUser } = useDirectusUsers({
-    staticToken: config.public.directus.staticToken,
-  });
   const { login } = useDirectusAuth();
 
   const firstName = ref("");
@@ -110,11 +107,19 @@
 
     registeringIn.value = true;
     try {
-      await createUser({
-        first_name: firstName.value,
-        last_name: lastName.value,
-        email: email.value,
-        password: password.value,
+      // directus module doesn't handle creating users using register method
+      await $fetch("/users/register", {
+        baseURL: config.public.directus.url,
+        method: "POST",
+        body: {
+          first_name: firstName.value,
+          last_name: lastName.value,
+          email: email.value,
+          password: password.value,
+        },
+        headers: {
+          Authorization: `Bearer ${config.public.directus.staticToken}`,
+        },
       });
       await login(email.value, password.value);
       router.push("/");

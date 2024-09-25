@@ -1,6 +1,6 @@
 import type { ApiCartReservation } from "./cart";
-import type { ApiInstitution } from "./institution";
-import type { ApiSport } from "./sport";
+import type { ApiSchedule } from "./schedule";
+import type { ApiSport } from "./service";
 import type { ApiTransaction } from "./transaction";
 import type { ApiUser } from "./user";
 
@@ -8,8 +8,7 @@ export type ApiCourt = {
   id: string;
   title: string;
   sport: ApiSport | null;
-  institution: ApiInstitution;
-  schedule_days: ApiScheduleDay[];
+  schedule: ApiSchedule | null;
 };
 
 export type ApiScheduleDay = {

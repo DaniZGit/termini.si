@@ -76,15 +76,15 @@
         fields: [
           "id",
           "title",
-          "schedules.id",
-          "schedules.title",
-          "schedules.dates.id",
-          "schedules.dates.date",
-          "schedules.dates.slots.id",
-          "schedules.dates.slots.start_time",
-          "schedules.dates.slots.end_time",
-          "schedules.dates.slots.price",
-          "schedules.dates.slots.available",
+          "schedule.id",
+          "schedule.title",
+          "schedule.dates.id",
+          "schedule.dates.date",
+          "schedule.dates.slots.id",
+          "schedule.dates.slots.start_time",
+          "schedule.dates.slots.end_time",
+          "schedule.dates.slots.price",
+          "schedule.dates.slots.available",
         ],
         filter: {
           service: {
@@ -92,7 +92,7 @@
           },
         },
         deep: {
-          schedules: {
+          schedule: {
             dates: {
               _filter: getDatesFilter.value,
             },
@@ -110,34 +110,30 @@
 
     if (Array.isArray(selectedDate.value)) {
       wellness.value?.forEach((wellns) => {
-        if (!wellns.schedules?.length) return;
+        if (!wellns.schedule) return;
 
-        wellns.schedules.forEach((schedule) => {
-          schedule.dates?.forEach((date) => {
-            if (date.slots?.length) {
-              timetables.push({
-                title: `${wellns.title}`,
-                subtitle: `${format(date.date, "(EEEE)", {
-                  locale: sl,
-                }).toString()}`,
-                date: date.date,
-                slots: date.slots,
-              });
-            }
-          });
+        wellns.schedule.dates?.forEach((date) => {
+          if (date.slots?.length) {
+            timetables.push({
+              title: `${wellns.title}`,
+              subtitle: `${format(date.date, "dd. M. yyyy").toString()}`,
+              date: date.date,
+              slots: date.slots,
+            });
+          }
         });
       });
     } else {
       wellness.value?.forEach((wellns) => {
         if (
-          wellns.schedules?.length &&
-          wellns.schedules[0].dates?.length &&
-          wellns.schedules[0].dates[0].slots?.length
+          wellns.schedule &&
+          wellns.schedule.dates?.length &&
+          wellns.schedule.dates[0].slots?.length
         ) {
           timetables.push({
             title: `${wellns.title}`,
-            date: wellns.schedules[0].dates[0].date,
-            slots: wellns.schedules[0].dates[0].slots,
+            date: wellns.schedule.dates[0].date,
+            slots: wellns.schedule.dates[0].slots,
           });
         }
       });

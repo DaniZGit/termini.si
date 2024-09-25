@@ -22,17 +22,10 @@
     }"
   >
     <ItemPlan
-      :plan="defaultPlan"
-      :bought="true"
-      class="text-nowrap"
-      @click="onPlanClick(defaultPlan)"
-    ></ItemPlan>
-
-    <ItemPlan
-      v-for="plan in service?.plans"
+      v-for="plan in plans"
       :key="plan.id"
       :plan="plan"
-      :bought="false"
+      :bought="user?.plans?.some((p) => p.plans_id.id == plan.id)"
       class="text-nowrap"
       @click="onPlanClick(plan)"
     ></ItemPlan>
@@ -47,14 +40,14 @@
 
 <script lang="ts" setup>
   import type { ApiPlan } from "~/types/plan";
-  import type { ApiService } from "~/types/service";
 
   const props = defineProps({
-    service: {
-      type: Object as PropType<ApiService>,
-      required: true,
+    plans: {
+      type: Array as PropType<ApiPlan[]>,
     },
   });
+
+  const { user } = useDirectusAuth();
 
   const plansContainer = ref<HTMLElement | null>(null);
   const showPlanDetailModal = ref(false);
@@ -65,17 +58,10 @@
     showPlanDetailModal.value = true;
   };
 
-  const defaultPlan = computed(() => ({
-    title: "Privzeto",
-    total_reservations_per_day: props.service?.total_reservations_per_day,
-    days_in_advance_to_reserve: props.service?.days_in_advance_to_reserve,
-    note: "Ta paket imajo vsi uporabniki in vsebuej privzete vrednost za število rezervacij na dan in za koliko dni vnaprej lahko navadni uporabnik rezervira",
-  }));
-
   const isPlansContainerOverflown = () => {
-    if (!props.service.plans) return false;
+    if (!props.plans) return false;
 
-    return props.service.plans.length > 1;
+    return props.plans.length > 2;
   };
 
   const onExpand = () => {

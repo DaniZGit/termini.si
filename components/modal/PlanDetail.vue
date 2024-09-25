@@ -100,9 +100,7 @@
   });
 
   const userOwnsPlan = () => {
-    return props.plan?.users?.some(
-      (u) => u.directus_users_id == user.value?.id
-    );
+    return user.value?.plans?.some((p) => p.plans_id.id == props.plan?.id);
   };
 
   const getButtonText = () => {

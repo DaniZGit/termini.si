@@ -83,6 +83,40 @@
       />
     </div>
 
+    <!-- Cart -->
+    <div
+      v-show="cartStore.slots.length || cartStore.ogSlots.length"
+      class="fixed bottom-0 left-0 right-0 flex justify-center"
+    >
+      <UiShadowPanel
+        class="relative inline-flex justify-center items-center gap-x-2 text-secondary z-30 py-2"
+      >
+        <UiButton
+          class="py-1 px-2 relative"
+          :disabled="!canOpenCartModal"
+          @click="showCartModal = true"
+        >
+          <Icon
+            :name="
+              canOpenCartModal
+                ? 'i-ic:baseline-calendar-month'
+                : 'i-svg-spinners-bars-rotate-fade'
+            "
+            size="22"
+            class="text-neutral-white"
+          />
+          <span
+            class="absolute -top-2.5 -right-2.5 flex justify-center items-center aspect-square h-7 w-auto text-sm text-neutral-white bg-secondary rounded-full"
+          >
+            {{ cartStore.slots.length }}
+          </span>
+        </UiButton>
+      </UiShadowPanel>
+    </div>
+
+    <!-- Cart Modal -->
+    <ModalCart v-model:visible="showCartModal"></ModalCart>
+
     <!-- Login Required Modal -->
     <ModalLoginRequired
       v-model:visible="showLoginRequiredModal"
@@ -97,6 +131,7 @@
   import type { ApiSchedule, ApiSlot } from "~/types/schedule";
 
   const { user } = useDirectusAuth();
+  const cartStore = useCartStore();
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,
     required: true,
@@ -123,8 +158,10 @@
 
     for await (const item of subscription) {
       console.log("slot update", item);
+      // @ts-ignore
       if (!item.data || !timetables.value) continue;
 
+      // @ts-ignore
       const changedSlots = item.data as ApiSlot[];
       changedSlots.forEach((changedSlot) => {
         timetables.value.forEach((timetable) => {
@@ -148,6 +185,7 @@
     return slotsAmount > 0;
   });
 
+  const showCartModal = ref(false);
   const showLoginRequiredModal = ref(false);
   const onSlotSelected = (slot: ApiSlot) => {
     // if user is not logged in, display "log in first" modal
@@ -157,11 +195,14 @@
     }
 
     // add to cart store
-    // cartStore.slots.push(timeSlot);
+    cartStore.slots.push(slot);
   };
 
-  const onSlotUnselected = () => {
-    console.log("unselected");
+  const onSlotUnselected = (slot: ApiSlot) => {
+    const slotIndex = cartStore.slots.findIndex((s) => s.id == slot.id);
+    if (slotIndex >= 0) {
+      cartStore.slots.splice(slotIndex, 1);
+    }
   };
 
   // schedule table helper functions
@@ -273,6 +314,12 @@
       return 0;
     });
   };
+
+  const canOpenCartModal = computed(
+    () =>
+      cartStore.addToCartStatus != "pending" &&
+      cartStore.slots.length == cartStore.ogSlots.length
+  );
 </script>
 
 <style></style>

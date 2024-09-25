@@ -2,6 +2,11 @@
   <div class="bg-neutral-white">
     <div v-if="error">error: {{ error }}</div>
 
+    <!-- Plans -->
+    <div class="px-4 py-4">
+      <ViewServicePlans :plans="getPlans"></ViewServicePlans>
+    </div>
+
     <!-- Schedule -->
     <div v-if="service" class="py-4 flex flex-col gap-y-2">
       <UiDatePicker
@@ -10,7 +15,7 @@
       ></UiDatePicker>
       <ViewSchedule
         :timetables="getTimetables"
-        :status="sportCourtsStatus"
+        :status="sportsStatus"
       ></ViewSchedule>
     </div>
   </div>
@@ -20,10 +25,11 @@
   import { format } from "date-fns";
   import type { PropType } from "vue";
   import type { Timetable } from "~/types/misc";
+  import type { ApiPlan } from "~/types/plan";
   import type {
     ApiService,
     ApiServiceTypeSports,
-    ApiSportCourt,
+    ApiSport,
   } from "~/types/service";
 
   const route = useRoute();
@@ -66,25 +72,35 @@
 
   // sport_courts data request
   const {
-    data: sportCourts,
+    data: sports,
     error,
-    status: sportCourtsStatus,
-  } = await useLazyAsyncData<ApiSportCourt[]>(
-    "sport_courts",
+    status: sportsStatus,
+  } = await useLazyAsyncData<ApiSport[]>(
+    "sports",
     () =>
-      readItems("sport_courts", {
+      readItems("sports", {
         fields: [
           "id",
           "title",
-          "schedules.id",
-          "schedules.title",
-          "schedules.dates.id",
-          "schedules.dates.date",
-          "schedules.dates.slots.id",
-          "schedules.dates.slots.start_time",
-          "schedules.dates.slots.end_time",
-          "schedules.dates.slots.price",
-          "schedules.dates.slots.available",
+          "courts.title",
+          "courts.schedule.id",
+          "courts.schedule.title",
+          "courts.schedule.dates.id",
+          "courts.schedule.dates.date",
+          "courts.schedule.dates.slots.id",
+          "courts.schedule.dates.slots.start_time",
+          "courts.schedule.dates.slots.end_time",
+          "courts.schedule.dates.slots.price",
+          "courts.schedule.dates.slots.available",
+          "plans.id",
+          "plans.title",
+          "plans.total_reservations",
+          "plans.total_reservations_per_day",
+          "plans.days_in_advance_to_reserve",
+          "plans.buyable",
+          "plans.price",
+          "plans.note",
+          "plans.service.id",
         ],
         filter: {
           service: {
@@ -99,9 +115,11 @@
           },
         },
         deep: {
-          schedules: {
-            dates: {
-              _filter: getDatesFilter.value,
+          courts: {
+            schedule: {
+              dates: {
+                _filter: getDatesFilter.value,
+              },
             },
           },
         },
@@ -112,18 +130,31 @@
     }
   );
 
+  const getPlans = computed(() => {
+    let plans: ApiPlan[] = [];
+
+    if (props.service.plans) plans = plans.concat(props.service.plans);
+    sports.value?.forEach((sport) => {
+      if (sport.plans) plans = plans.concat(sport.plans);
+    });
+
+    console.log("plans", plans);
+
+    return plans;
+  });
+
   const getTimetables = computed(() => {
     const timetables: Timetable[] = [];
 
     if (Array.isArray(selectedDate.value)) {
-      sportCourts.value?.forEach((sportCourt) => {
-        if (!sportCourt.schedules?.length) return;
+      sports.value?.forEach((sport) => {
+        if (!sport.courts.length) return;
 
-        sportCourt.schedules.forEach((schedule) => {
-          schedule.dates?.forEach((date) => {
+        sport.courts.forEach((court) => {
+          court.schedule?.dates?.forEach((date) => {
             if (date.slots?.length) {
               timetables.push({
-                title: `${sportCourt.title}`,
+                title: `${sport.schedule?.title}`,
                 subtitle: `${format(date.date, "dd. M. yyyy").toString()}`,
                 date: date.date,
                 slots: date.slots,
@@ -133,18 +164,20 @@
         });
       });
     } else {
-      sportCourts.value?.forEach((sportCourt) => {
-        if (
-          sportCourt.schedules?.length &&
-          sportCourt.schedules[0].dates?.length &&
-          sportCourt.schedules[0].dates[0].slots?.length
-        ) {
-          timetables.push({
-            title: `${sportCourt.title}`,
-            date: sportCourt.schedules[0].dates[0].date,
-            slots: sportCourt.schedules[0].dates[0].slots,
-          });
-        }
+      sports.value?.forEach((sport) => {
+        sport.courts.forEach((court) => {
+          if (
+            court.schedule &&
+            court.schedule.dates?.length &&
+            court.schedule.dates[0].slots?.length
+          ) {
+            timetables.push({
+              title: `${court.schedule.title}`,
+              date: court.schedule.dates[0].date,
+              slots: court.schedule.dates[0].slots,
+            });
+          }
+        });
       });
     }
 

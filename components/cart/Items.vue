@@ -1,19 +1,19 @@
 <template>
   <div class="flex flex-col overflow-y-auto text-neutral-darkGray">
-    <div v-for="(groupedSlots, date) in getGroupedSlots()" :key="date">
-      <div
-        v-for="(slots, courtTitle) in groupedSlots"
-        :key="courtTitle"
-        class="flex flex-col pb-2"
-      >
-        <div class="flex gap-x-2">
-          <h2 class="text-lg font-semibold">
-            {{ courtTitle }}
-          </h2>
-          <span> ({{ getDateNice(date) }}) </span>
-        </div>
+    <div
+      v-for="(groupedByDateSlots, date) in getGroupedSlots()"
+      :key="date"
+      class="flex flex-col pb-2"
+    >
+      <div class="flex gap-x-2">
+        <h2 class="text-lg font-semibold">
+          {{ getDateNice(date as string) }}
+        </h2>
+      </div>
+      <div v-for="(groupedSlots, title) in groupedByDateSlots">
+        <h4 class="font-medium">{{ title }}</h4>
         <div
-          v-for="slot in slots"
+          v-for="slot in groupedSlots"
           :key="slot.id"
           class="flex justify-between pl-2"
         >
@@ -26,7 +26,7 @@
           </div>
           <div class="flex items-center gap-x-1">
             <span>
-              {{ getPriceNice(slot.price) }}
+              {{ getPriceNice(slot.price.toString()) }}
             </span>
             <Icon
               v-if="removable"
@@ -38,15 +38,16 @@
           </div>
         </div>
       </div>
+      <!-- </div> -->
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import type { ApiTimeSlot } from "~/types/court";
+  import type { ApiSlot } from "~/types/schedule";
 
   const props = defineProps({
-    timeSlots: Array as PropType<ApiTimeSlot[]>,
+    slots: Array as PropType<ApiSlot[]>,
     removable: {
       type: Boolean,
       default: false,
@@ -54,33 +55,26 @@
   });
 
   const emit = defineEmits<{
-    remove: [slot: ApiTimeSlot];
+    remove: [slot: ApiSlot];
   }>();
 
   const getGroupedSlots = () => {
-    if (!props.timeSlots) return {};
+    if (!props.slots) return {};
 
-    let groupedSlots: Record<string, Record<string, ApiTimeSlot[]>> = {};
+    let groupedSlots: Record<string, Record<string, ApiSlot[]>> = {};
 
-    console.log(props.timeSlots);
+    console.log(props.slots);
 
-    props.timeSlots.forEach((slot) => {
-      if (groupedSlots[slot.schedule_day.date]) {
-        if (
-          groupedSlots[slot.schedule_day.date][slot.schedule_day.court.title]
-        ) {
-          groupedSlots[slot.schedule_day.date][
-            slot.schedule_day.court.title
-          ].push(slot);
+    props.slots.forEach((slot) => {
+      if (groupedSlots[slot.date.date]) {
+        if (groupedSlots[slot.date.date][slot.date.schedule.title]) {
+          groupedSlots[slot.date.date][slot.date.schedule.title].push(slot);
         } else {
-          groupedSlots[slot.schedule_day.date][slot.schedule_day.court.title] =
-            [slot];
+          groupedSlots[slot.date.date][slot.date.schedule.title] = [slot];
         }
       } else {
-        groupedSlots[slot.schedule_day.date] = {};
-        groupedSlots[slot.schedule_day.date][slot.schedule_day.court.title] = [
-          slot,
-        ];
+        groupedSlots[slot.date.date] = {};
+        groupedSlots[slot.date.date][slot.date.schedule.title] = [slot];
       }
     });
 
@@ -93,8 +87,8 @@
     );
 
     Object.keys(sorted).forEach((key) => {
-      Object.keys(sorted[key]).forEach((courtKey) => {
-        sorted[key][courtKey] = sorted[key][courtKey].sort((a, b) => {
+      Object.keys(sorted[key]).forEach((schedule) => {
+        sorted[key][schedule] = sorted[key][schedule].sort((a, b) => {
           if (a.start_time < b.end_time) return -1;
           else if (a.start_time > b.start_time) return 1;
           return 0;
@@ -102,12 +96,10 @@
       });
     });
 
-    console.log(sorted);
-
     return sorted;
   };
 
-  const onRemove = (slot: ApiTimeSlot) => {
+  const onRemove = (slot: ApiSlot) => {
     emit("remove", slot);
   };
 </script>

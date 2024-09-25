@@ -7,19 +7,6 @@
         </NuxtLink>
 
         <div class="flex gap-x-1">
-          <div class="relative inline-block" @click="onCartClick">
-            <Icon
-              name="i-ic:baseline-calendar-month"
-              size="30"
-              class="text-primary"
-            />
-            <span
-              v-if="cartStore.slots.length"
-              class="text-xs absolute bottom-0 right-0 bg-secondary text-neutral-white rounded-full px-1"
-            >
-              {{ cartStore.slots.length }}
-            </span>
-          </div>
           <Icon
             :name="menuIsOpened ? 'i-ic:round-close' : 'i-ic:round-menu'"
             size="32"
@@ -111,17 +98,12 @@
         </div>
       </div>
     </Teleport>
-
-    <!-- Cart Modal -->
-    <ModalCart v-model:visible="showCartModal"></ModalCart>
   </div>
 </template>
 
 <script lang="ts" setup>
   const router = useRouter();
   const { user, logout } = useDirectusAuth();
-  const cartStore = useCartStore();
-  const showCartModal = ref(false);
 
   const links = [
     {
@@ -158,11 +140,6 @@
   const onMenuOpen = () => {
     if (menuIsOpened.value) hideMenu();
     else showMenu();
-  };
-
-  const onCartClick = () => {
-    hideMenu();
-    showCartModal.value = !showCartModal.value;
   };
 
   const onLinkClick = (to: string) => {

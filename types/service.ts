@@ -1,14 +1,14 @@
+import type { ApiCourt } from "./court";
+import type { ApiImage } from "./image";
 import type { ApiInstitution } from "./institution";
 import type { ApiPlan } from "./plan";
 import type { ApiSchedule } from "./schedule";
-import type { ApiSport } from "./sport";
 
 export type ApiService = {
   id: string;
+  content: string;
   display_type: "daily" | "weekly";
   institution: ApiInstitution;
-  total_reservations_per_day: number;
-  days_in_advance_to_reserve: number;
   plans: ApiPlan[] | null;
 } & (
   | ApiServiceTypeSports
@@ -21,7 +21,7 @@ export type ApiServiceType = "sports" | "hairdressing" | "wellness" | "fitness";
 
 export type ApiServiceTypeSports = {
   type: Extract<ApiServiceType, "sports">;
-  sport_courts: ApiSportCourt[] | null;
+  sports: ApiSport[] | null;
 };
 
 export type ApiServiceTypeHairdressing = {
@@ -43,27 +43,31 @@ export type ApiHairdresser = {
   id: string;
   title: string;
   service: ApiService;
-  schedules: ApiSchedule[] | null;
+  schedule: ApiSchedule | null;
+  plans: ApiPlan[] | null;
 };
 
 export type ApiFitness = {
   id: string;
   title: string;
   service: ApiService;
-  schedules: ApiSchedule[] | null;
+  schedule: ApiSchedule | null;
 };
 
-export type ApiSportCourt = {
+export type ApiSport = {
   id: string;
   title: string;
-  sport: ApiSport;
+  image: ApiImage;
+  courts: ApiCourt[];
   service: ApiService;
-  schedules: ApiSchedule[] | null;
+  schedule: ApiSchedule | null;
+  plans: ApiPlan[] | null;
 };
 
 export type ApiWellness = {
   id: string;
   title: string;
   service: ApiService;
-  schedules: ApiSchedule[] | null;
+  schedule: ApiSchedule | null;
+  plans: ApiPlan[] | null;
 };

@@ -1,5 +1,4 @@
-import type { ApiInstitution } from "./institution";
-import type { ApiSport } from "./sport";
+import type { ApiService } from "./service";
 import type { ApiUser } from "./user";
 
 export type ApiPlan = {
@@ -14,19 +13,13 @@ export type ApiPlan = {
   available_from: string | null;
   available_to: string | null;
   note: string | null;
-  institution: ApiInstitution;
-  sport: ApiSport;
-  users: {
-    id: number;
-    plans_id: number;
-    directus_users_id: string;
-    total_reservations: number;
-  }[];
+  service: ApiService | null;
+  users: ApiPlanUser[] | null;
 };
 
 export type ApiPlanUser = {
   id: number;
   plans_id: number | ApiPlan;
-  directus_users_id: string;
+  directus_users_id: string | ApiUser;
   total_reservations: number;
 };

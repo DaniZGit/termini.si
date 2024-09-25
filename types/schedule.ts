@@ -5,9 +5,6 @@ export type ApiSchedule = {
   title: string;
   date_definition: ApiDateDefinition[] | null;
   dates: ApiDate[] | null;
-  sport_court: ApiSportCourt | null;
-  hairdresser: ApiHairdresser | null;
-  wellness: ApiWellness | null;
 };
 
 export type ApiDateDefinition = {

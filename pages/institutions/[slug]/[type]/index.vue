@@ -10,11 +10,6 @@
         </h2>
       </div>
 
-      <!-- Plans -->
-      <div class="px-4 py-4 flex flex-col">
-        <ViewServicePlans :service="service"></ViewServicePlans>
-      </div>
-
       <ViewServiceSports
         v-if="service.type == 'sports'"
         :service="service"
@@ -41,6 +36,7 @@
 <script lang="ts" setup>
   import type { ApiService, ApiServiceType } from "~/types/service";
 
+  const cartStore = useCartStore();
   const { readItems } = useDirectusItems();
   const route = useRoute();
 
@@ -53,8 +49,6 @@
       "institution.id",
       "institution.slug",
       "institution.title",
-      "total_reservations_per_day",
-      "days_in_advance_to_reserve",
       "plans.id",
       "plans.title",
       "plans.total_reservations",
@@ -63,6 +57,7 @@
       "plans.buyable",
       "plans.price",
       "plans.note",
+      "plans.service.id",
     ];
 
     switch (serviceType) {
@@ -87,7 +82,7 @@
   const {
     data: service,
     error,
-    status,
+    status: serviceStatus,
   } = await useLazyAsyncData<ApiService>(
     "service",
     () =>
@@ -107,7 +102,9 @@
       }),
     {
       transform: (data) => {
-        return data.length ? data[0] : null;
+        const singleService = data.length ? data[0] : null;
+        cartStore.lastVisitedService = singleService;
+        return singleService;
       },
     }
   );

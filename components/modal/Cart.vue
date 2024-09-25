@@ -38,9 +38,9 @@
 
           <CartItems
             v-else
-            :time-slots="cartStore.slots"
+            :slots="cartStore.slots"
             :removable="true"
-            @remove="onTimeSlotRemove"
+            @remove="onSlotRemove"
           ></CartItems>
           <hr class="border-primary border-2 rounded-full mt-auto" />
 
@@ -51,7 +51,7 @@
             </span>
           </div>
 
-          <div v-if="userHasPlans()">
+          <div v-if="getUserPlans().length">
             <div class="flex flex-wrap justify-between items-center gap-y-1">
               <div>
                 <UiFormCheckbox
@@ -67,7 +67,7 @@
                   class="text-neutral-darkGray border-2 border-secondary rounded-lg px-1 py-0.5"
                 >
                   <option
-                    v-for="plan in getInstitutionPlans()"
+                    v-for="plan in getUserPlans()"
                     :value="plan"
                     class="overflow-clip"
                   >
@@ -129,13 +129,14 @@
 
 <script lang="ts" setup>
   import { useCartStore } from "~/stores/cart";
-  import type { ApiTimeSlot } from "~/types/court";
   import type { ApiError } from "~/types/error";
-  import type { ApiPlan, ApiPlanUser } from "~/types/plan";
+  import type { ApiPlanUser } from "~/types/plan";
+  import type { ApiSlot } from "~/types/schedule";
 
   const { user } = useDirectusUsers();
   const stateStore = useStateStore();
   const cartStore = useCartStore();
+  const route = useRoute();
 
   const modal = ref<HTMLElement | null>(null);
   const visible = defineModel("visible", {
@@ -148,47 +149,36 @@
 
   const getTotalAmount = () => {
     const total = cartStore.slots.reduce((sum, slot) => {
-      return sum + parseFloat(slot.price);
+      return sum + parseFloat(slot.price.toString());
     }, 0);
 
     return total;
   };
 
-  const onTimeSlotRemove = (timeSlot: ApiTimeSlot) => {
-    const index = cartStore.slots.findIndex((slot) => slot.id == timeSlot.id);
+  const onSlotRemove = (slot: ApiSlot) => {
+    const index = cartStore.slots.findIndex((s) => s.id == slot.id);
     if (index >= 0) cartStore.slots.splice(index, 1);
   };
 
   const usePlan = ref(true);
   const selectedPlan = ref<ApiPlanUser | null>(null);
-  const userHasPlans = () => {
-    return user.value?.plans.some((plan: ApiPlanUser) => {
-      if (typeof plan.plans_id == "object") {
-        return (
-          plan.plans_id &&
-          plan.plans_id.institution.id ===
-            cartStore.slots.at(0)?.schedule_day.court.institution.id
-        );
-      }
+  const getUserPlans = () => {
+    const slug = route.params.slug;
+    const type = route.params.type;
 
-      return false;
-    });
-  };
-
-  const getInstitutionPlans = () => {
     return user.value?.plans.filter((plan: ApiPlanUser) => {
       if (typeof plan.plans_id !== "object") return false;
 
       return (
         plan.plans_id &&
-        plan.plans_id.institution.id ===
-          cartStore.slots.at(0)?.schedule_day.court.institution.id
+        plan.plans_id.service?.institution.slug === slug &&
+        plan.plans_id.service.type === type
       );
     });
   };
 
   watch(visible, () => {
-    const userPlans = getInstitutionPlans();
+    const userPlans = getUserPlans();
 
     if (userPlans.length) {
       if (selectedPlan.value !== userPlans.at(0)) {
@@ -205,7 +195,7 @@
     if (!usePlan.value && user.value.tokens < getTotalAmount()) return false;
     if (
       usePlan &&
-      (!userHasPlans() ||
+      (!getUserPlans().length ||
         !selectedPlan.value ||
         selectedPlan.value.total_reservations < cartStore.slots.length)
     )

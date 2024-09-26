@@ -10,6 +10,8 @@
         </h2>
       </div>
 
+      <div class="px-4 py-4" v-html="service.content"></div>
+
       <ViewServiceSports
         v-if="service.type == 'sports'"
         :service="service"

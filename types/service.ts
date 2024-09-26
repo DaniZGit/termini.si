@@ -57,7 +57,8 @@ export type ApiFitness = {
 export type ApiSport = {
   id: string;
   title: string;
-  image: ApiImage;
+  type: "badminton" | "tennis";
+  image: ApiImage | null;
   courts: ApiCourt[];
   service: ApiService;
   schedule: ApiSchedule | null;

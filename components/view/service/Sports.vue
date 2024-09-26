@@ -13,6 +13,34 @@
         v-model="selectedDate"
         :display-type="service.display_type"
       ></UiDatePicker>
+      <!-- Sports tab -->
+      <div
+        v-if="sports?.length"
+        class="flex flex-nowrap overflow-x-auto border-y-2 border-primary no-scrollbar"
+      >
+        <div
+          v-for="type in getSportTypes()"
+          :key="type"
+          class="text-center py-2 border-r-2 border-primary last:border-none text-neutral-darkGray font-semibold transition-colors duration-300 px-4"
+          style="flex: 1 0 150px"
+          :class="{
+            'bg-primary text-neutral-white': type == selectedSportType,
+          }"
+          @click="onSportSelect(type)"
+        >
+          <span class="flex justify-center items-center gap-x-2">
+            <span>
+              {{ getSportTypeTitle(type) }}
+            </span>
+            <Icon
+              v-show="type == selectedSportType && sportsStatus != 'pending'"
+              name="i-ic:round-close"
+              size="24"
+            />
+          </span>
+        </div>
+      </div>
+
       <ViewSchedule
         :timetables="getTimetables"
         :status="sportsStatus"
@@ -40,6 +68,17 @@
       required: true,
     },
   });
+
+  // sports tab
+  const selectedSportType = ref<string | null>(null);
+  const onSportSelect = (type: string) => {
+    if (type == selectedSportType.value) selectedSportType.value = null;
+    else selectedSportType.value = type;
+  };
+
+  const getSportTypes = () => {
+    return sports.value?.map((sport) => sport.type);
+  };
 
   // datepicker stuff
   const selectedDate = ref<Date | [string, string]>(new Date());
@@ -82,6 +121,7 @@
         fields: [
           "id",
           "title",
+          "type",
           "courts.title",
           "courts.schedule.id",
           "courts.schedule.title",
@@ -113,6 +153,13 @@
               _icontains: route.params.type ?? "",
             },
           },
+          type: selectedSportType.value
+            ? {
+                _eq: selectedSportType.value,
+              }
+            : {
+                _neq: selectedSportType.value,
+              },
         },
         deep: {
           courts: {
@@ -125,7 +172,7 @@
         },
       }),
     {
-      watch: [selectedDate],
+      watch: [selectedDate, selectedSportType],
       immediate: false,
     }
   );

@@ -4,7 +4,7 @@
     :class="
       selected
         ? 'bg-secondary'
-        : !slot?.available
+        : status != 'available'
         ? 'bg-neutral-gray'
         : 'bg-primary'
     "
@@ -15,7 +15,7 @@
     @click="onClick"
   >
     <span class="absolute top-0 left-0 text-[10px] p-1">
-      {{ slot?.start_time.substring(0, 5) }}
+      {{ slot?.time_start.substring(0, 5) }}
     </span>
     <!-- Weather stuff -->
     <!-- <span
@@ -25,10 +25,12 @@
       {{ slot?.current_temp }} °C
     </span> -->
     <span
-      >{{ selected ? "Izbrano" : !slot?.available ? "Zasedeno" : "Rezerviraj" }}
+      >{{
+        selected ? "Izbrano" : status != "available" ? "Zasedeno" : "Rezerviraj"
+      }}
     </span>
     <span class="absolute bottom-0 left-0 text-[10px] p-1">
-      {{ slot?.end_time.substring(0, 5) }}
+      {{ slot?.time_end.substring(0, 5) }}
     </span>
     <span class="absolute bottom-0 right-0 text-[10px] p-1">
       {{ getPriceNice(slot?.price.toString()) }}
@@ -39,30 +41,33 @@
 <script lang="ts" setup>
   import type { PropType } from "vue";
   import type { ApiSlot } from "~/types/schedule";
+  import type { TimeTableSlot } from "~/utils/generateSlots";
 
   const cartStore = useCartStore();
 
   const selected = computed(() => {
-    return cartStore.slots.some((slot) => slot.id == props.slot?.id);
+    return false;
+    // return cartStore.slots.some((slot) => slot.id == props.slot?.id);
   });
 
   const props = defineProps({
-    slot: Object as PropType<ApiSlot>,
+    slot: Object as PropType<TimeTableSlot>,
+    status: String as PropType<"available" | "booked">,
     topOffset: Number,
     height: Number,
   });
 
   const emit = defineEmits<{
-    selected: [slot: ApiSlot];
-    unselected: [slot: ApiSlot];
+    selected: [slot: TimeTableSlot];
+    unselected: [slot: TimeTableSlot];
   }>();
 
   const onClick = () => {
     if (
       !props.slot ||
       // props.slot.booked_by_user?.id ||
-      (!props.slot.available &&
-        !cartStore.slots.some((slot) => slot.id == props.slot?.id))
+      props.status != "available"
+      // && !cartStore.slots.some((slot) => slot.id == props.slot?.id))
     )
       return;
 

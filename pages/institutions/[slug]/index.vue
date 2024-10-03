@@ -63,48 +63,35 @@
       <div v-html="institution?.content" class="text-neutral-darkGray"></div>
     </div>
 
-    <!-- Services -->
-    <div class="m-4 flex flex-col gap-y-2 rounded-md">
-      <h2 class="text-2xl font-semibold text-secondary">Storitve</h2>
+    <!-- schedule -->
+    <div
+      v-if="institution && institutionStatus != 'pending'"
+      class="m-4 flex flex-col gap-y-2 rounded-md"
+    >
+      <h2 class="text-2xl font-semibold text-secondary">Termini</h2>
       <div class="flex flex-col gap-y-4">
-        <NuxtLink
-          v-for="service in institution?.services"
-          :key="service.id"
-          :to="`/institutions/${institution?.slug}/${service.type}`"
-          class="border-b-2 border-primary pb-2 group"
-        >
-          <div class="flex items-center gap-x-2">
-            <Icon
-              name="i-ic:baseline-design-services"
-              size="32"
-              class="text-primary"
-            />
-            <h4 class="text-lg font-semibold text-secondary">
-              {{ getServiceTypeTitle(service) }}
-            </h4>
-            <div class="ml-auto flex items-center">
-              <span
-                class="text-primary text-sm group-hover:font-bold transition-all"
-                >Na termin</span
-              >
-              <Icon
-                name="i-ic:round-keyboard-arrow-right"
-                size="26"
-                class="text-primary group-hover:translate-x-2 transition-transform"
-              />
-            </div>
-          </div>
-          <div></div>
-        </NuxtLink>
+        <UiDatePicker
+          v-model="selectedDate"
+          :display-type="institution?.display_type"
+        ></UiDatePicker>
+
+        <ViewSchedule
+          :timetables="getTimetables"
+          :status="servicesStatus"
+          @select="onVariantSelect"
+        ></ViewSchedule>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+  import { eachDayOfInterval, format } from "date-fns";
   import { register } from "swiper/element";
   import type { ApiInstitution } from "~/types/institution";
+  import type { Timetable } from "~/types/misc";
   import type { ApiService } from "~/types/service";
+  import type { TimeTableSlot } from "~/utils/generateSlots";
   register(); // registers swiper elements
 
   const { readItems } = useDirectusItems();
@@ -112,14 +99,18 @@
 
   const cartStore = useCartStore();
 
+  // datepicker stuff
+  const selectedDate = ref<Date | [string, string]>(new Date());
+
   // institution data request
   const {
     data: institution,
-    error,
-    status,
+    error: institutionError,
+    status: institutionStatus,
   } = await useAsyncData<ApiInstitution>(
     "institution",
     () =>
+      // @ts-ignore
       readItems("institutions", {
         fields: [
           "id",
@@ -130,8 +121,22 @@
           "city.*",
           "phone",
           "website",
+          "display_type",
           "images.directus_files_id.*",
-          "services.*",
+          "services.id",
+          "services.title",
+          "services.type",
+          "services.variants.id",
+          "services.variants.title",
+          "services.variants.slot_definitions.time_start",
+          "services.variants.slot_definitions.time_end",
+          "services.variants.slot_definitions.duration",
+          "services.variants.slot_definitions.price",
+          "services.schedule.id",
+          "services.schedule.title",
+          "services.schedule.day_definitions.day_of_week",
+          "services.schedule.day_definitions.time_start",
+          "services.schedule.day_definitions.time_end",
         ],
         filter: {
           slug: {
@@ -142,21 +147,172 @@
       }),
     {
       transform: (data) => {
+        // @ts-ignore
         return data.length ? data[0] : null;
       },
     }
   );
 
-  // date picker
+  // services data request
+  const selectedServiceVariants = ref<Record<string, number>>({});
+  const {
+    data: services,
+    error: servicesError,
+    status: servicesStatus,
+  } = await useLazyAsyncData<ApiService[]>(
+    "services",
+    () =>
+      // @ts-ignore
+      readItems("services", {
+        fields: [
+          "id",
+          "title",
+          "type",
+          "variants.id",
+          "variants.title",
+          "variants.slot_definitions.time_start",
+          "variants.slot_definitions.time_end",
+          "variants.slot_definitions.duration",
+          "variants.slot_definitions.price",
+          "schedule.id",
+          "schedule.title",
+          "schedule.day_definitions.day_of_week",
+          "schedule.day_definitions.time_start",
+          "schedule.day_definitions.time_end",
+        ],
+        filter: {
+          institution: {
+            slug: {
+              _icontains: route.params.slug ?? "",
+            },
+          },
+        },
+      }),
+    {
+      transform: (data) => {
+        // reset selected variants
+        selectedServiceVariants.value = {};
+
+        return data;
+      },
+      watch: [selectedDate],
+    }
+  );
+
+  const getTimetables = computed(() => {
+    const timetables: Timetable[] = [];
+
+    if (Array.isArray(selectedDate.value)) {
+      // weekly display
+      const dates = eachDayOfInterval({
+        start: selectedDate.value[0],
+        end: selectedDate.value[1],
+      });
+
+      services.value?.forEach((service) => {
+        if (!service.variants || !service.variants?.length) return;
+
+        for (let i = 0; i < dates.length; i++) {
+          const date = dates[i];
+          const dayName = format(date, "EEEE").toLowerCase();
+          const timetableID = `${service.title}-${dayName}`;
+          const dayDefinition = service.schedule?.day_definitions?.find(
+            (day) => day.day_of_week === dayName
+          );
+          if (!dayDefinition) return;
+
+          let variant = service.variants?.find(
+            (variant) =>
+              timetableID in selectedServiceVariants.value &&
+              selectedServiceVariants.value[timetableID] == variant.id
+          );
+          if (!variant) {
+            // if no selected variant, set first one as selected
+            variant = service.variants[0];
+            selectedServiceVariants.value[timetableID] = variant.id;
+          }
+
+          const slots: TimeTableSlot[] = [];
+          variant.slot_definitions?.forEach((slotDefinition) => {
+            const generatedSlots = generateSlots(
+              slotDefinition.time_start,
+              slotDefinition.time_end,
+              slotDefinition.duration,
+              slotDefinition.price
+            );
+            slots.push(...generatedSlots);
+          });
+
+          timetables.push({
+            id: timetableID,
+            title: service.title,
+            subtitle: `${format(date, "dd. M. yyyy").toString()}`,
+            date: date.toString(),
+            slots: slots,
+            variants: service.variants,
+          });
+        }
+      });
+    } else {
+      // daily display
+      services.value?.forEach((service) => {
+        if (!service.variants || !service.variants?.length) return;
+
+        const timetableID = `${service.title}`;
+        const dayName = format(
+          selectedDate.value.toString(),
+          "EEEE"
+        ).toLowerCase();
+        const dayDefinition = service.schedule?.day_definitions?.find(
+          (day) => day.day_of_week === dayName
+        );
+        if (!dayDefinition) return;
+
+        let variant = service.variants?.find(
+          (variant) =>
+            timetableID in selectedServiceVariants.value &&
+            selectedServiceVariants.value[timetableID] == variant.id
+        );
+        if (!variant) {
+          // if no selected variant, set first one as selected
+          variant = service.variants[0];
+          selectedServiceVariants.value[timetableID] = variant.id;
+        }
+
+        const slots: TimeTableSlot[] = [];
+        variant?.slot_definitions?.forEach((slotDefinition) => {
+          const generatedSlots = generateSlots(
+            slotDefinition.time_start,
+            slotDefinition.time_end,
+            slotDefinition.duration,
+            slotDefinition.price
+          );
+          slots.push(...generatedSlots);
+        });
+
+        timetables.push({
+          id: timetableID,
+          title: service.title,
+          date: selectedDate.value.toString(),
+          slots: slots,
+          variants: service.variants,
+        });
+      });
+    }
+
+    return timetables;
+  });
+
+  const onVariantSelect = (event: Event, id: string) => {
+    console.log("before change", selectedServiceVariants.value);
+    const el = event.target as HTMLSelectElement;
+    selectedServiceVariants.value[id] = parseInt(el.value) || 0;
+    console.log("after change", selectedServiceVariants.value);
+  };
+
   onMounted(async () => {
     // if looking at different institution, clear the current cart
-    if (
-      cartStore.slots.length &&
-      cartStore.slots[0].schedule_day.court.institution.id !=
-        institution.value?.id
-    ) {
-      cartStore.slots = [];
-    }
+    cartStore.slots = [];
   });
 </script>
 

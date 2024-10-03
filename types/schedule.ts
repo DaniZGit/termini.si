@@ -1,13 +1,13 @@
-import type { ApiHairdresser, ApiSportCourt, ApiWellness } from "./service";
+import type { ApiService } from "./service";
 
 export type ApiSchedule = {
   id: string;
   title: string;
-  date_definition: ApiDateDefinition[] | null;
-  dates: ApiDate[] | null;
+  day_definitions: ApiDayDefinition[] | null;
+  services: ApiService[] | null;
 };
 
-export type ApiDateDefinition = {
+export type ApiDayDefinition = {
   id: number;
   day_of_week:
     | "monday"
@@ -17,24 +17,9 @@ export type ApiDateDefinition = {
     | "friday"
     | "saturday"
     | "sunday";
-  slot_defintiions: ApiSlotDefinition[] | null;
-  schedule: ApiSchedule;
-};
-
-export type ApiSlotDefinition = {
-  id: string;
-  start_time: string;
-  end_time: string;
-  available: boolean;
-  price: number;
-  date_definition: ApiDateDefinition;
-};
-
-export type ApiDate = {
-  id: string;
-  date: string;
-  schedule: ApiSchedule;
-  slots: ApiSlot[] | null;
+  time_start: string;
+  time_end: string;
+  schedule: ApiSchedule | null;
 };
 
 export type ApiSlot = {
@@ -43,5 +28,4 @@ export type ApiSlot = {
   end_time: string;
   available: boolean;
   price: number;
-  date: ApiDate;
 };

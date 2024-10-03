@@ -51,30 +51,16 @@
         v-if="institution.services?.length"
         class="border-primary border-[1px] rounded-full"
       />
-      <div v-if="institution.services?.length" class="flex flex-col gap-y-2">
-        <NuxtLink
-          v-for="service in institution.services"
-          :key="service.id"
-          :to="`/institutions/${institution.slug}/${service.type}`"
-          class="flex items-center gap-x-2"
+      <div
+        v-if="institution.services?.length"
+        class="flex flex-wrap gap-y-2 gap-x-2"
+      >
+        <span
+          v-for="type in getUniqueServiceTypes()"
+          class="border-2 border-secondary rounded-full px-1 flex items-center text-sm"
         >
-          <Icon
-            name="i-ic:baseline-design-services"
-            size="18"
-            class="shrink-0 my-auto text-secondary"
-          />
-          <span
-            class="text-neutral-darkGray font-bold hover:ring-primary rounded-full text-sm transition-all"
-          >
-            {{ getServiceTypeTitle(service) }}
-          </span>
-          <div
-            class="ml-auto border-2 border-secondary rounded-full px-1 flex items-center"
-          >
-            <span class="text-sm uppe"> Na termine </span>
-            <Icon name="i-ic:round-chevron-right" size="18" />
-          </div>
-        </NuxtLink>
+          {{ getServiceTypeTitle(type) }}
+        </span>
       </div>
       <NuxtLink
         :to="`/institutions/${institution.slug}`"
@@ -83,7 +69,7 @@
         @touchstart="focus = true"
         @touchend="focus = false"
       >
-        <UiButton class="w-full group">Ogled ustanove</UiButton>
+        <UiButton class="w-full group">Ogled terminov</UiButton>
       </NuxtLink>
     </div>
   </div>
@@ -97,6 +83,15 @@
   const props = defineProps({
     institution: Object as PropType<ApiInstitution>,
   });
+
+  const getUniqueServiceTypes = () => {
+    const types: string[] = [];
+    props.institution?.services?.forEach((service) => {
+      if (!types.includes(service.type)) types.push(service.type);
+    });
+
+    return types;
+  };
 </script>
 
 <style></style>

@@ -1,5 +1,6 @@
 import type { LocationQueryValue } from "vue-router";
-import type { ApiSlot } from "./schedule";
+import type { TimeTableSlot } from "~/utils/generateSlots";
+import type { ApiVariant } from "./service";
 
 export type InstitutionsFilter = {
   sort: string;
@@ -7,8 +8,10 @@ export type InstitutionsFilter = {
 };
 
 export type Timetable = {
+  id: string;
   title: string;
   subtitle?: string;
   date: string;
-  slots: ApiSlot[] | null;
+  slots: TimeTableSlot[] | null;
+  variants: ApiVariant[] | null;
 };

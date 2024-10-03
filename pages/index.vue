@@ -1,8 +1,8 @@
 <template>
   <div class="bg-neutral-white">
     <div class="text-center px-4 py-4">
-      <NuxtLink to="/sports" class="flex justify-between items-end group">
-        <h1 class="text-3xl font-semibold text-secondary">Izberi šport</h1>
+      <NuxtLink to="/services" class="flex justify-between items-end group">
+        <h1 class="text-3xl font-semibold text-secondary">Izberi storitev</h1>
         <Icon
           name="i-ic:baseline-arrow-right-alt"
           size="32"

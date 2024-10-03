@@ -1,74 +1,31 @@
-import type { ApiCourt } from "./court";
-import type { ApiImage } from "./image";
 import type { ApiInstitution } from "./institution";
 import type { ApiPlan } from "./plan";
 import type { ApiSchedule } from "./schedule";
 
-export type ApiService = {
-  id: string;
-  content: string;
-  display_type: "daily" | "weekly";
-  institution: ApiInstitution;
-  plans: ApiPlan[] | null;
-} & (
-  | ApiServiceTypeSports
-  | ApiServiceTypeHairdressing
-  | ApiServiceTypeWellness
-  | ApiServiceTypeFitness
-);
-
 export type ApiServiceType = "sports" | "hairdressing" | "wellness" | "fitness";
 
-export type ApiServiceTypeSports = {
-  type: Extract<ApiServiceType, "sports">;
-  sports: ApiSport[] | null;
-};
-
-export type ApiServiceTypeHairdressing = {
-  type: Extract<ApiServiceType, "hairdressing">;
-  hairdressers: ApiHairdresser[] | null;
-};
-
-export type ApiServiceTypeWellness = {
-  type: Extract<ApiServiceType, "wellness">;
-  hairdressers: ApiWellness[] | null;
-};
-
-export type ApiServiceTypeFitness = {
-  type: Extract<ApiServiceType, "fitness">;
-  hairdressers: ApiFitness[] | null;
-};
-
-export type ApiHairdresser = {
+export type ApiService = {
   id: string;
   title: string;
-  service: ApiService;
+  content: string;
+  type: ApiServiceType;
+  display_type: "daily" | "weekly";
+  institution: ApiInstitution;
   schedule: ApiSchedule | null;
+  variants: ApiVariant[] | null;
   plans: ApiPlan[] | null;
 };
 
-export type ApiFitness = {
-  id: string;
+export type ApiVariant = {
+  id: number;
   title: string;
-  service: ApiService;
-  schedule: ApiSchedule | null;
+  slot_definitions: ApiSlotDefinition[] | null;
 };
 
-export type ApiSport = {
-  id: string;
-  title: string;
-  type: "badminton" | "tennis";
-  image: ApiImage | null;
-  courts: ApiCourt[];
-  service: ApiService;
-  schedule: ApiSchedule | null;
-  plans: ApiPlan[] | null;
-};
-
-export type ApiWellness = {
-  id: string;
-  title: string;
-  service: ApiService;
-  schedule: ApiSchedule | null;
-  plans: ApiPlan[] | null;
+export type ApiSlotDefinition = {
+  id: number;
+  time_start: string;
+  time_end: string;
+  duration: number;
+  price: number;
 };

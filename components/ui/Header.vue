@@ -119,8 +119,8 @@
       url: "/institutions",
     },
     {
-      title: "Športne dejavnosti",
-      url: "/sports",
+      title: "Storitve",
+      url: "/services",
     },
     {
       title: "Žetoni",

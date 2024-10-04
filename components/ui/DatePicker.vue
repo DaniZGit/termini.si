@@ -12,7 +12,7 @@
         v-model="selectedDate"
         :enable-time-picker="false"
         :min-date="new Date()"
-        :week-picker="displayType == 'weekly'"
+        :week-picker="displayType == 'weekly' || displayType == 'grouped'"
         :week-start="1"
         :clearable="false"
         :format="datepickerFormat"
@@ -45,10 +45,11 @@
     subWeeks,
   } from "date-fns";
   import type { PropType } from "vue";
+  import type { ApiInstitutionDisplayType } from "~/types/institution";
 
   const props = defineProps({
     displayType: {
-      type: String as PropType<"daily" | "weekly">,
+      type: String as PropType<ApiInstitutionDisplayType>,
       default: "daily",
     },
   });
@@ -79,7 +80,7 @@
   };
 
   onMounted(() => {
-    if (props.displayType == "weekly") {
+    if (props.displayType == "weekly" || props.displayType == "grouped") {
       const startDate = startOfWeek(new Date(), { weekStartsOn: 1 });
       const endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
 

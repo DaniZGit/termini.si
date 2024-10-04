@@ -2,7 +2,7 @@ import type { ApiCity } from "./city";
 import type { ApiImage } from "./image";
 import type { ApiService } from "./service";
 
-export type ApiInstitutionDisplayType = "daily" | "weekly";
+export type ApiInstitutionDisplayType = "daily" | "weekly" | "grouped";
 
 export type ApiInstitution = {
   id: string;

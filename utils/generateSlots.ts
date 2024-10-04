@@ -8,15 +8,15 @@ export type TimeTableSlot = {
 };
 
 export default (
-  timeStart: string,
-  timeEnd: string,
+  timeStart: string | Date,
+  timeEnd: string | Date,
   duration: number,
   price: number
 ) => {
   // Convert time strings to Date objects (use any reference date)
-  const referenceDate = new Date(2024, 9, 1); // Any valid date
-  const startTime = parse(timeStart, "HH:mm:ss", referenceDate);
-  const endTime = parse(timeEnd, "HH:mm:ss", referenceDate);
+  const startTime =
+    typeof timeStart == "string" ? timeToDate(timeStart) : timeStart;
+  const endTime = typeof timeEnd == "string" ? timeToDate(timeEnd) : timeEnd;
 
   const slots: TimeTableSlot[] = [];
   let currentTime = startTime;

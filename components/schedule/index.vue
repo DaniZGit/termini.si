@@ -143,8 +143,6 @@
   import type { AsyncDataRequestStatus } from "#app";
   import type { PropType } from "vue";
   import type { Timetable } from "~/types/misc";
-  import type { ApiSchedule, ApiSlot } from "~/types/schedule";
-  import type { ApiVariant } from "~/types/service";
 
   const { user } = useDirectusAuth();
   const cartStore = useCartStore();

@@ -10,78 +10,25 @@
         <UiLoader></UiLoader>
       </div>
     </div>
-    <div v-else-if="slotsExist" class="flex gap-x-1">
-      <div>
-        <div
-          class="grid grid-flow-row overflow-auto border-r-2 border-secondary"
-        >
-          <Icon
-            name="i-ic:baseline-access-time"
-            size="26"
-            class="m-auto text-secondary"
-            :style="`height: ${getMinHeaderHeight}px;`"
-          />
-          <div
-            v-for="i in getTimestamps()"
-            class="flex justify-center items-start px-2 text-neutral-darkGray font-medium"
-            :style="`height: ${slotCellRowHeight}px;`"
-          >
-            <span class="text-center text-base -translate-y-3">
-              {{ minsToTime(getMinTime() + i * getMinSlotDuration()) }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div
-        class="grid grid-flow-col gap-y-4 overflow-auto"
-        :style="`grid-auto-columns: ${slotCellColWidth}px;`"
-      >
-        <div
-          v-for="timetable in getSortedTimetables"
-          :key="timetable.title"
-          class="flex flex-col justify-start text-center"
-        >
-          <div
-            class="flex flex-col justify-center items-center text-center mx-0.5"
-            :style="`height: ${getMinHeaderHeight}px;`"
-          >
-            <h4 class="font-semibold text-secondary whitespace-pre-line">
-              {{ timetable.title }}
-            </h4>
-            <h5
-              v-if="timetable.subtitle"
-              class="text-sm font-semibold text-secondary whitespace-pre-line"
-            >
-              {{ timetable.subtitle }}
-            </h5>
-            <select
-              v-if="timetable.variants && timetable.variants.length > 1"
-              class="border-2 rounded-full px-2 text-sm w-full"
-              @change="emit('select', $event, timetable.id)"
-            >
-              <option
-                v-for="(variant, i) in timetable.variants"
-                :key="variant.id"
-                :value="variant.id"
-                :selected="i == 0"
-              >
-                {{ variant.title }}
-              </option>
-            </select>
-          </div>
-          <div class="grow relative">
-            <ItemSlot
-              v-for="(slot, i) in timetable.slots"
-              :key="`${timetable.title}-${slot.time_start}-${slot.time_end}`"
-              :slot="slot"
-              status="available"
-              :top-offset="getSlotTopOffset(slot)"
-              :height="getSlotHeight(slot)"
-              @selected="onSlotSelected"
-              @unselected="onSlotUnselected"
-            ></ItemSlot>
-          </div>
-        </div>
+    <div v-else-if="slotsExist">
+      <ScheduleViewDaily
+        v-if="displayType == 'daily'"
+        v-model:timetables="timetables"
+        @select="(e, id) => emit('select', e, id)"
+      ></ScheduleViewDaily>
+      <ScheduleViewWeekly
+        v-else-if="displayType == 'weekly'"
+        v-model:timetables="timetables"
+        @select="(e, id) => emit('select', e, id)"
+      ></ScheduleViewWeekly>
+      <ScheduleViewGrouped
+        v-else-if="displayType == 'grouped'"
+        v-model:timetables="timetables"
+        @select="(e, id) => emit('select', e, id)"
+      ></ScheduleViewGrouped>
+      <div v-else class="text-center">
+        Display type is not handled:
+        <span class="font-bold">{{ displayType }}</span>
       </div>
     </div>
     <div
@@ -142,6 +89,7 @@
 <script lang="ts" setup>
   import type { AsyncDataRequestStatus } from "#app";
   import type { PropType } from "vue";
+  import type { ApiInstitutionDisplayType } from "~/types/institution";
   import type { Timetable } from "~/types/misc";
 
   const { user } = useDirectusAuth();
@@ -152,6 +100,9 @@
   });
 
   const props = defineProps({
+    displayType: {
+      type: String as PropType<ApiInstitutionDisplayType>,
+    },
     status: {
       type: String as PropType<AsyncDataRequestStatus>,
     },
@@ -216,124 +167,6 @@
     //   cartStore.slots.splice(slotIndex, 1);
     // }
   };
-
-  // schedule table helper functions
-  const slotCellRowHeight = 75; // in pixels
-  const slotCellColWidth = 120; // in pixels
-  const getTimestamps = () => {
-    const minMaxTimeDiff = (getMaxTime() - getMinTime()) / getMinSlotDuration();
-
-    return [...Array(Math.floor(minMaxTimeDiff) + 1).keys()];
-  };
-
-  // returns min time across all schedules (in minutes)
-  const getMinTime = () => {
-    let minTime = 24 * 60; // in minutes
-
-    timetables.value.forEach((timetable) => {
-      if (!timetable.slots?.length) return;
-
-      timetable.slots.forEach((slot) => {
-        const slotStartTimeMins = timeToMins(slot.time_start);
-        if (slotStartTimeMins < minTime) minTime = slotStartTimeMins;
-      });
-    });
-
-    return minTime;
-  };
-
-  // returns max time across all schedules (in minutes)
-  const getMaxTime = () => {
-    let maxTime = 0; // in minutes
-
-    timetables.value.forEach((timetable) => {
-      if (!timetable.slots?.length) return;
-
-      timetable.slots.forEach((slot) => {
-        const slotStartTimeMins = timeToMins(slot.time_end);
-        if (slotStartTimeMins > maxTime) maxTime = slotStartTimeMins;
-      });
-    });
-
-    return maxTime;
-  };
-
-  // returns min slot duration across all schedules (in minutes)
-  const getMinSlotDuration = () => {
-    let minDuration = 24 * 60; // 24h -> mins
-
-    timetables.value.forEach((timetable) => {
-      if (!timetable.slots?.length) return;
-
-      timetable.slots.forEach((slot) => {
-        const slotStartTimeMins = timeToMins(slot.time_start);
-        const slotEndTimeMins = timeToMins(slot.time_end);
-        if (slotEndTimeMins - slotStartTimeMins < minDuration)
-          minDuration = slotEndTimeMins - slotStartTimeMins;
-      });
-    });
-
-    return minDuration;
-  };
-
-  const getSlotTopOffset = (slot: TimeTableSlot) => {
-    let slotMinutes = timeToMins(slot.time_start);
-    let minTimeMinutes = getMinTime();
-
-    const slotHours = Math.floor(slotMinutes / 60);
-    const minTimeHours = Math.floor(minTimeMinutes / 60);
-
-    slotMinutes = slotMinutes % 60;
-    minTimeMinutes = minTimeMinutes % 60;
-
-    const topOffset =
-      (slotHours - minTimeHours + slotMinutes / 60) *
-      slotCellRowHeight *
-      (60 / getMinSlotDuration());
-
-    return topOffset;
-  };
-
-  const getSlotHeight = (slot: TimeTableSlot) => {
-    const startTimeMins = timeToMins(slot.time_start);
-    const endTimeMins = timeToMins(slot.time_end);
-
-    const slotDuration = endTimeMins - startTimeMins;
-    const minSlotDuration = getMinSlotDuration();
-
-    const topOffset = (slotDuration / minSlotDuration) * slotCellRowHeight;
-
-    return topOffset;
-  };
-
-  const getMinHeaderHeight = computed(() => {
-    const timetableWithManyVariants = timetables.value.find(
-      (timetable) => timetable.variants && timetable.variants?.length > 1
-    );
-    if (timetableWithManyVariants) return 75;
-
-    return 50;
-  });
-
-  const getSortedTimetables = computed(() => {
-    return timetables.value.sort((a, b) => {
-      const aDate = new Date(a.date);
-      const bDate = new Date(b.date);
-      if (aDate.getTime() < bDate.getTime()) return -1;
-      else if (aDate.getTime() > bDate.getTime()) return 1;
-      return 0;
-    });
-  });
-
-  // const getSortedSlots = (schedule: ApiSchedule) => {
-  //   if (!schedule.dates?.length) return;
-
-  //   return schedule.dates[0].slots?.sort((a, b) => {
-  //     if (a.start_time < b.start_time) return -1;
-  //     else if (a.start_time > b.start_time) return 1;
-  //     return 0;
-  //   });
-  // };
 
   const canOpenCartModal = computed(
     () =>

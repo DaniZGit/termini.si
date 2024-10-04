@@ -1,0 +1,167 @@
+<template>
+  <div class="flex gap-x-1">
+    <div>
+      <div class="grid grid-flow-row overflow-auto border-r-2 border-secondary">
+        <Icon
+          name="i-ic:baseline-access-time"
+          size="26"
+          class="m-auto text-secondary"
+          :style="`height: ${headerColHeight}px;`"
+        />
+        <div
+          v-for="i in getTimestampsAcrossTimetables(timetables)"
+          class="flex justify-center items-start px-2 text-neutral-darkGray font-medium"
+          :style="`height: ${slotCellRowHeight}px;`"
+        >
+          <span class="text-center text-base -translate-y-3">
+            {{
+              minsToTime(
+                getMinTimeAcrossTimetables(timetables) +
+                  i * getMinSlotDurationAcrossTimetables(timetables)
+              )
+            }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-flow-col gap-y-4 overflow-auto divide-x-2">
+      <div
+        v-for="(groups, date) in getGroupedTimetables"
+        class="flex flex-col"
+        :style="`width: ${slotCellColWidth * groups.length}px;`"
+      >
+        <div
+          class="flex flex-col justify-center items-center text-center mx-0.5"
+          :style="`height: ${headerColHeight}px;`"
+        >
+          <h4
+            class="font-semibold text-secondary whitespace-pre-line capitalize"
+          >
+            {{ format(date, "EEEE", { locale: sl }) }}
+          </h4>
+          <!-- <h5
+              class="text-sm font-semibold text-secondary whitespace-pre-line"
+            >
+              {{ date }}
+            </h5> -->
+        </div>
+        <div
+          v-for="(groupedTimetables, groupNum) in groups"
+          class="flex flex-col justify-start text-center"
+        >
+          <div v-for="timetable in groupedTimetables" class="grow relative">
+            <ItemSlot
+              v-for="(slot, i) in timetable.slots"
+              :key="`${timetable.title}-${slot.time_start}-${slot.time_end}`"
+              :slot="slot"
+              status="available"
+              :title="timetable.service?.title"
+              :height="
+                getSlotHeightAcrossTimetables(
+                  timetables,
+                  slot,
+                  slotCellRowHeight
+                )
+              "
+              :top-offset="
+                getTopOffsetBasedOnTimetables(
+                  timetables,
+                  slot,
+                  slotCellRowHeight
+                )
+              "
+              :width="slotCellColWidth"
+              :left-offset="slotCellColWidth * groupNum"
+              @selected="onSlotSelected"
+              @unselected="onSlotUnselected"
+            ></ItemSlot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+  import { format, parse } from "date-fns";
+  import { sl } from "date-fns/locale";
+  import type { Timetable } from "~/types/misc";
+
+  const timetables = defineModel("timetables", {
+    type: Array as PropType<Array<Timetable>>,
+    required: true,
+  });
+
+  const emit = defineEmits<{
+    select: [event: Event, id: string];
+  }>();
+
+  const slotCellRowHeight = 75; // in pixels
+  const slotCellColWidth = 120; // in pixels
+  const headerColHeight = computed(() => {
+    const timetableWithManyVariants = timetables.value.find(
+      (timetable) =>
+        timetable.service?.variants && timetable.service.variants.length > 1
+    );
+    if (timetableWithManyVariants) return 75;
+
+    return 50;
+  });
+
+  const getGroupedTimetables = computed(() => {
+    const groupedTimetables: Record<string, Timetable[][]> = {};
+    timetables.value.forEach((timetable) => {
+      if (!(timetable.date in groupedTimetables)) {
+        groupedTimetables[timetable.date] = [[timetable]];
+      } else {
+        // check in every group if there is free space for this timeslot
+        let foundAFreeGroup = false;
+        for (let i = 0; i < groupedTimetables[timetable.date].length; i++) {
+          const group = groupedTimetables[timetable.date][i];
+          const timetablesIntersect = group.some((groupTimetable) => {
+            const doesIntersect = timetable.slots?.some((slot) =>
+              groupTimetable.slots?.some((groupSlot) =>
+                doSlotsIntersect(slot, groupSlot)
+              )
+            );
+            if (doesIntersect) return true; // check next group
+
+            return false;
+          });
+
+          if (timetablesIntersect) continue;
+          else {
+            group.push(timetable);
+            foundAFreeGroup = true;
+            break;
+          }
+        }
+
+        // if timetable couldnt join a group, create a new group
+        if (!foundAFreeGroup)
+          groupedTimetables[timetable.date].push([timetable]);
+      }
+    });
+
+    return groupedTimetables;
+  });
+
+  const onSlotSelected = (slot: TimeTableSlot) => {
+    // if user is not logged in, display "log in first" modal
+    // if (!user.value) {
+    //   showLoginRequiredModal.value = true;
+    //   return;
+    // }
+    // add to cart store
+    // cartStore.slots.push(slot);
+  };
+
+  const onSlotUnselected = (slot: TimeTableSlot) => {
+    // const slotIndex = cartStore.slots.findIndex((s) => s.id == slot.id);
+    // if (slotIndex >= 0) {
+    //   cartStore.slots.splice(slotIndex, 1);
+    // }
+  };
+</script>
+
+<style></style>

@@ -77,6 +77,7 @@
 
         <Schedule
           :timetables="getTimetables"
+          :display-type="institution.display_type"
           :status="servicesStatus"
           @select="onVariantSelect"
         ></Schedule>
@@ -87,7 +88,6 @@
 
 <script lang="ts" setup>
   import { eachDayOfInterval, format, max, min } from "date-fns";
-  import { sl } from "date-fns/locale/sl";
   import { register } from "swiper/element";
   import type { ApiInstitution } from "~/types/institution";
   import type { Timetable } from "~/types/misc";
@@ -200,107 +200,28 @@
     }
   );
 
-  const generateDailyTimetables = (date: Date) => {
-    const timetables: Timetable[] = [];
-    services.value?.forEach((service) => {
-      if (!service.variants || !service.variants?.length) return;
+  const getTimetables = computed(() => {
+    let timetables: Timetable[] = [];
 
-      const timetableID = `${service.title}`;
-      const dayName = format(
-        selectedDate.value.toString(),
-        "EEEE"
-      ).toLowerCase();
-      const dayDefinition = service.schedule?.day_definitions?.find(
-        (day) => day.day_of_week === dayName
-      );
-      if (!dayDefinition) return;
-
-      let variant = service.variants?.find(
-        (variant) =>
-          timetableID in selectedServiceVariants.value &&
-          selectedServiceVariants.value[timetableID] == variant.id
-      );
-      if (!variant) {
-        // if no selected variant, set first one as selected
-        variant = service.variants[0];
-        selectedServiceVariants.value[timetableID] = variant.id;
-      }
-
-      const slots: TimeTableSlot[] = [];
-      variant?.slot_definitions?.forEach((slotDefinition) => {
-        const generatedSlots = generateSlots(
-          slotDefinition.time_start,
-          slotDefinition.time_end,
-          slotDefinition.duration,
-          slotDefinition.price
-        );
-        slots.push(...generatedSlots);
+    if (Array.isArray(selectedDate.value)) {
+      // weekly display
+      const dates = eachDayOfInterval({
+        start: selectedDate.value[0],
+        end: selectedDate.value[1],
       });
 
-      timetables.push({
-        id: timetableID,
-        title: service.title,
-        date: selectedDate.value.toString(),
-        slots: slots,
-        variants: service.variants,
-      });
-    });
+      timetables = generateTimetables(dates);
+    } else {
+      // daily display
+      timetables = generateTimetables([selectedDate.value]);
+    }
 
     return timetables;
-  };
+  });
 
-  const generateWeeklyTimetables = (dates: Date[]) => {
+  const generateTimetables = (dates: Date[]) => {
     const timetables: Timetable[] = [];
-    services.value?.forEach((service) => {
-      if (!service.variants || !service.variants?.length) return;
 
-      for (let i = 0; i < dates.length; i++) {
-        const date = dates[i];
-        const dayName = format(date, "EEEE").toLowerCase();
-        const timetableID = `${service.title}-${dayName}`;
-        const dayDefinition = service.schedule?.day_definitions?.find(
-          (day) => day.day_of_week === dayName
-        );
-        if (!dayDefinition) continue;
-
-        let variant = service.variants?.find(
-          (variant) =>
-            timetableID in selectedServiceVariants.value &&
-            selectedServiceVariants.value[timetableID] == variant.id
-        );
-        if (!variant) {
-          // if no selected variant, set first one as selected
-          variant = service.variants[0];
-          selectedServiceVariants.value[timetableID] = variant.id;
-        }
-
-        const slots: TimeTableSlot[] = [];
-        variant.slot_definitions?.forEach((slotDefinition) => {
-          const generatedSlots = generateSlots(
-            slotDefinition.time_start,
-            slotDefinition.time_end,
-            slotDefinition.duration,
-            slotDefinition.price
-          );
-          slots.push(...generatedSlots);
-        });
-
-        timetables.push({
-          id: timetableID,
-          title: service.title,
-          subtitle: `${format(date, "dd. M. yyyy").toString()}`,
-          date: date.toString(),
-          slots: slots,
-          variants: service.variants,
-        });
-      }
-    });
-
-    return timetables;
-  };
-
-  const generateGroupedTimetables = (dates: Date[]) => {
-    const timetables: Timetable[] = [];
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
       const dayName = format(date, "EEEE").toLowerCase();
@@ -345,11 +266,10 @@
 
         timetables.push({
           id: timetableID,
-          title: `${format(date, "EEEE", { locale: sl }).toString()}`,
-          subtitle: `${format(date, "dd. M. yyyy").toString()}`,
+          title: service.title,
           date: date.toString(),
           slots: slots,
-          variants: service.variants,
+          service: service,
         });
       });
     }
@@ -357,34 +277,9 @@
     return timetables;
   };
 
-  const getTimetables = computed(() => {
-    let timetables: Timetable[] = [];
-
-    if (Array.isArray(selectedDate.value)) {
-      // weekly display
-      const dates = eachDayOfInterval({
-        start: selectedDate.value[0],
-        end: selectedDate.value[1],
-      });
-
-      if (institution.value?.display_type == "weekly") {
-        timetables = generateWeeklyTimetables(dates);
-      } else if (institution.value?.display_type == "grouped") {
-        timetables = generateGroupedTimetables(dates);
-      }
-    } else {
-      // daily display
-      timetables = generateDailyTimetables(selectedDate.value);
-    }
-
-    return timetables;
-  });
-
   const onVariantSelect = (event: Event, id: string) => {
-    console.log("before change", selectedServiceVariants.value);
     const el = event.target as HTMLSelectElement;
     selectedServiceVariants.value[id] = parseInt(el.value) || 0;
-    console.log("after change", selectedServiceVariants.value);
   };
 
   onMounted(async () => {

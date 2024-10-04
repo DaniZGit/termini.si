@@ -10,7 +10,9 @@
     "
     :style="`
       height: ${height}px;
+      width: min(100%, ${width}px);
       top: ${topOffset}px;
+      left: ${leftOffset}px;
     `"
     @click="onClick"
   >
@@ -24,8 +26,9 @@
     >
       {{ slot?.current_temp }} °C
     </span> -->
-    <span
-      >{{
+    <span v-if="title">{{ title }}</span>
+    <span v-else>
+      {{
         selected ? "Izbrano" : status != "available" ? "Zasedeno" : "Rezerviraj"
       }}
     </span>
@@ -54,7 +57,13 @@
     slot: Object as PropType<TimeTableSlot>,
     status: String as PropType<"available" | "booked">,
     topOffset: Number,
+    leftOffset: {
+      type: Number,
+      default: 0,
+    },
     height: Number,
+    width: Number,
+    title: String,
   });
 
   const emit = defineEmits<{

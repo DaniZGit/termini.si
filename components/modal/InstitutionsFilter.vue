@@ -302,7 +302,6 @@
   };
 
   const onMyLocation = () => {
-    console.log("Move to my current location");
     // Try HTML5 geolocation.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(

@@ -63,8 +63,6 @@
 
     let groupedSlots: Record<string, Record<string, ApiSlot[]>> = {};
 
-    console.log(props.slots);
-
     props.slots.forEach((slot) => {
       if (groupedSlots[slot.date.date]) {
         if (groupedSlots[slot.date.date][slot.date.schedule.title]) {

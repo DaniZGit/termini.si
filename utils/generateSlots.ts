@@ -1,4 +1,4 @@
-import { add, format, isBefore, parse } from "date-fns";
+import { add, format, isBefore } from "date-fns";
 
 export type TimeTableSlot = {
   time_start: string;
@@ -28,8 +28,8 @@ export default (
       nextSlot.getTime() === endTime.getTime()
     ) {
       slots.push({
-        time_start: format(currentTime, "HH:mm"),
-        time_end: format(nextSlot, "HH:mm"),
+        time_start: format(currentTime, "HH:mm:ss"),
+        time_end: format(nextSlot, "HH:mm:ss"),
         duration: duration,
         price: price,
       });

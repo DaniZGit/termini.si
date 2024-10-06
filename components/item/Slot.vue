@@ -43,18 +43,16 @@
 
 <script lang="ts" setup>
   import type { PropType } from "vue";
-  import type { ApiSlot } from "~/types/schedule";
-  import type { TimeTableSlot } from "~/utils/generateSlots";
+  import type { TimetableSlot } from "~/types/misc";
 
   const cartStore = useCartStore();
 
   const selected = computed(() => {
-    return false;
-    // return cartStore.slots.some((slot) => slot.id == props.slot?.id);
+    return cartStore.slots.some((slot) => doSlotsMatch(slot, props.slot));
   });
 
   const props = defineProps({
-    slot: Object as PropType<TimeTableSlot>,
+    slot: Object as PropType<TimetableSlot>,
     status: String as PropType<"available" | "booked">,
     topOffset: Number,
     leftOffset: {
@@ -67,16 +65,16 @@
   });
 
   const emit = defineEmits<{
-    selected: [slot: TimeTableSlot];
-    unselected: [slot: TimeTableSlot];
+    selected: [slot: TimetableSlot];
+    unselected: [slot: TimetableSlot];
   }>();
 
   const onClick = () => {
     if (
       !props.slot ||
       // props.slot.booked_by_user?.id ||
-      props.status != "available"
-      // && !cartStore.slots.some((slot) => slot.id == props.slot?.id))
+      (props.status != "available" &&
+        !cartStore.slots.some((slot) => doSlotsMatch(slot, props.slot)))
     )
       return;
 

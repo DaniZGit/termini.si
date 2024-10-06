@@ -90,9 +90,8 @@
   import { eachDayOfInterval, format, max, min } from "date-fns";
   import { register } from "swiper/element";
   import type { ApiInstitution } from "~/types/institution";
-  import type { Timetable } from "~/types/misc";
+  import type { Timetable, TimetableSlot } from "~/types/misc";
   import type { ApiService } from "~/types/service";
-  import type { TimeTableSlot } from "~/utils/generateSlots";
   register(); // registers swiper elements
 
   const { readItems } = useDirectusItems();
@@ -124,20 +123,6 @@
           "website",
           "display_type",
           "images.directus_files_id.*",
-          "services.id",
-          "services.title",
-          "services.type",
-          "services.variants.id",
-          "services.variants.title",
-          "services.variants.slot_definitions.time_start",
-          "services.variants.slot_definitions.time_end",
-          "services.variants.slot_definitions.duration",
-          "services.variants.slot_definitions.price",
-          "services.schedule.id",
-          "services.schedule.title",
-          "services.schedule.day_definitions.day_of_week",
-          "services.schedule.day_definitions.time_start",
-          "services.schedule.day_definitions.time_end",
         ],
         filter: {
           slug: {
@@ -155,7 +140,15 @@
   );
 
   // services data request
-  const selectedServiceVariants = ref<Record<string, number>>({});
+  const selectedServiceVariants = ref<
+    Record<
+      string,
+      {
+        id: number;
+        date: Date;
+      }
+    >
+  >({});
   const {
     data: services,
     error: servicesError,
@@ -171,6 +164,8 @@
           "type",
           "variants.id",
           "variants.title",
+          "variants.slot_definitions.id",
+          "variants.slot_definitions.days_of_week",
           "variants.slot_definitions.time_start",
           "variants.slot_definitions.time_end",
           "variants.slot_definitions.duration",
@@ -229,26 +224,39 @@
       services.value?.forEach((service) => {
         if (!service.variants || !service.variants?.length) return;
 
+        // get schedule settings based on the day of week
         const dayDefinition = service.schedule?.day_definitions?.find(
           (day) => day.day_of_week === dayName
         );
         if (!dayDefinition) return;
 
+        // find selected variant (if one is selected)
         const timetableID = `${service.title}-${dayName}`;
         let variant = service.variants?.find(
           (variant) =>
             timetableID in selectedServiceVariants.value &&
-            selectedServiceVariants.value[timetableID] == variant.id
+            selectedServiceVariants.value[timetableID].id == variant.id
         );
         if (!variant) {
           // if no selected variant, set first one as selected
           variant = service.variants[0];
-          selectedServiceVariants.value[timetableID] = variant.id;
+          selectedServiceVariants.value[timetableID] = {
+            id: variant.id,
+            date: date,
+          };
         }
 
-        const slots: TimeTableSlot[] = [];
+        const slots: TimetableSlot[] = [];
         variant.slot_definitions?.forEach((slotDefinition) => {
+          // only add slots if the setting is set for this day_of_week
+          if (!slotDefinition.days_of_week.includes(dayDefinition.day_of_week))
+            return;
+
+          // generate slot based on time_start, time_end and duration of the slot
           const generatedSlots = generateSlots(
+            variant,
+            slotDefinition,
+            date,
             max([
               timeToDate(dayDefinition.time_start),
               timeToDate(slotDefinition.time_start),
@@ -256,9 +264,7 @@
             min([
               timeToDate(dayDefinition.time_end),
               timeToDate(slotDefinition.time_end),
-            ]),
-            slotDefinition.duration,
-            slotDefinition.price
+            ])
           );
 
           slots.push(...generatedSlots);
@@ -279,7 +285,15 @@
 
   const onVariantSelect = (event: Event, id: string) => {
     const el = event.target as HTMLSelectElement;
-    selectedServiceVariants.value[id] = parseInt(el.value) || 0;
+    selectedServiceVariants.value[id].id = parseInt(el.value) || 0;
+
+    // remove all previous selected slots from the cart
+    const updatedSlots = cartStore.slots.filter(
+      (slot) =>
+        slot.variant.id == selectedServiceVariants.value[id].id ||
+        slot.date.getTime() != selectedServiceVariants.value[id].date.getTime()
+    );
+    cartStore.slots = updatedSlots;
   };
 
   onMounted(async () => {

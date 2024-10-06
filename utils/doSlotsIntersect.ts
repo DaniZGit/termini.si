@@ -1,6 +1,7 @@
 import { isAfter, isBefore, isEqual } from "date-fns";
+import type { TimetableSlot } from "~/types/misc";
 
-export default (slot1: TimeTableSlot, slot2: TimeTableSlot) => {
+export default (slot1: TimetableSlot, slot2: TimetableSlot) => {
   // Check if one slot starts before the other ends and ends after the other starts
   const firstTimeStartDate = timeToDate(slot1.time_start);
   const firstTimeEndDate = timeToDate(slot1.time_end);

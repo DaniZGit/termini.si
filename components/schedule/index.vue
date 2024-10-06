@@ -15,16 +15,22 @@
         v-if="displayType == 'daily'"
         v-model:timetables="timetables"
         @select="(e, id) => emit('select', e, id)"
+        @slot-select="onSlotSelected"
+        @slot-unselect="onSlotUnselected"
       ></ScheduleViewDaily>
       <ScheduleViewWeekly
         v-else-if="displayType == 'weekly'"
         v-model:timetables="timetables"
         @select="(e, id) => emit('select', e, id)"
+        @slot-select="onSlotSelected"
+        @slot-unselect="onSlotUnselected"
       ></ScheduleViewWeekly>
       <ScheduleViewGrouped
         v-else-if="displayType == 'grouped'"
         v-model:timetables="timetables"
         @select="(e, id) => emit('select', e, id)"
+        @slot-select="onSlotSelected"
+        @slot-unselect="onSlotUnselected"
       ></ScheduleViewGrouped>
       <div v-else class="text-center">
         Display type is not handled:
@@ -43,6 +49,10 @@
         size="64"
         class="text-neutral-darkGray"
       />
+    </div>
+
+    <div>
+      {{ cartStore.addToCartStatus }}
     </div>
 
     <!-- Cart -->
@@ -90,7 +100,7 @@
   import type { AsyncDataRequestStatus } from "#app";
   import type { PropType } from "vue";
   import type { ApiInstitutionDisplayType } from "~/types/institution";
-  import type { Timetable } from "~/types/misc";
+  import type { Timetable, TimetableSlot } from "~/types/misc";
 
   const { user } = useDirectusAuth();
   const cartStore = useCartStore();
@@ -150,22 +160,29 @@
 
   const showCartModal = ref(false);
   const showLoginRequiredModal = ref(false);
-  const onSlotSelected = (slot: TimeTableSlot) => {
+  const onSlotSelected = (slot: TimetableSlot) => {
     // if user is not logged in, display "log in first" modal
     if (!user.value) {
       showLoginRequiredModal.value = true;
       return;
     }
 
-    // add to cart store
-    // cartStore.slots.push(slot);
+    // add the slot to the cart
+    cartStore.slots.push(slot);
   };
 
-  const onSlotUnselected = (slot: TimeTableSlot) => {
-    // const slotIndex = cartStore.slots.findIndex((s) => s.id == slot.id);
-    // if (slotIndex >= 0) {
-    //   cartStore.slots.splice(slotIndex, 1);
-    // }
+  const onSlotUnselected = (slot: TimetableSlot) => {
+    // find the unselected slot and remove it
+    const slotIndex = cartStore.slots.findIndex(
+      (s) =>
+        s.variant.id == slot.variant.id &&
+        s.date == slot.date &&
+        s.time_start == slot.time_start &&
+        s.time_start == slot.time_start
+    );
+    if (slotIndex >= 0) {
+      cartStore.slots.splice(slotIndex, 1);
+    }
   };
 
   const canOpenCartModal = computed(

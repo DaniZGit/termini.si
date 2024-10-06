@@ -1,24 +1,32 @@
+import { id } from "date-fns/locale";
 import { defineStore } from "pinia";
-import type { ApiTimeSlot } from "~/types/court";
-import type { ApiSlot } from "~/types/schedule";
-import { ApiService } from "~/types/service";
+import type { TimetableSlot } from "~/types/misc";
 
 export const useCartStore = defineStore("cart", () => {
   const cartReservationID = ref("");
-  const slots = ref<ApiSlot[]>([]);
-  const ogSlots = ref<ApiSlot[]>([]);
-  const lastVisitedService = ref<ApiService | null>(null);
+  const slots = ref<TimetableSlot[]>([]);
+  const ogSlots = ref<TimetableSlot[]>([]);
+  // const lastVisitedService = ref<ApiService | null>(null);
 
   // add to cart functionality
-  const slotIds = computed(() => slots.value.map((slot) => slot.id));
-  const serviceId = computed(() => lastVisitedService.value?.id);
+  // const slotIds = computed(() => slots.value.map((slot) => slot.id));
+  // const serviceId = computed(() => lastVisitedService.value?.id);
+  const slotsQuery = computed(() =>
+    slots.value.map((slot) => ({
+      date: slot.date,
+      time_start: slot.time_start,
+      time_end: slot.time_end,
+      variant_id: slot.variant.id,
+      slot_definition_id: slot.slot_definition.id,
+    }))
+  );
   const {
     data: addToCartData,
     error: addToCartError,
     refresh: execAddToCart,
     status: addToCartStatus,
   } = useFetch<{
-    slots: ApiSlot[];
+    slots: TimetableSlot[];
   }>(`/add-to-cart`, {
     baseURL: useRuntimeConfig().public.directus.url,
     method: "PATCH",
@@ -26,8 +34,8 @@ export const useCartStore = defineStore("cart", () => {
       Authorization: `Bearer ${useDirectusUsers().tokens.value?.access_token}`,
     },
     body: {
-      slots: slotIds,
-      service: serviceId,
+      slots: slotsQuery,
+      // service: serviceId,
     },
     immediate: true,
     watch: false,
@@ -46,13 +54,15 @@ export const useCartStore = defineStore("cart", () => {
 
   const addToCart = async () => {
     await execAddToCart();
+    ogSlots.value = useCloned(slots).cloned.value;
+    return [];
 
-    let removedSlots: ApiSlot[] = [];
+    // let removedSlots: TimetableSlot[] = [];
     if (!addToCartError.value && addToCartData.value) {
-      const newSlotIds = addToCartData.value.slots.map((slot) => slot.id);
-      removedSlots = slots.value.filter(
-        (slot) => !newSlotIds?.includes(slot.id)
-      );
+      // const newSlotIds = addToCartData.value.slots.map((slot) => slot.id);
+      // removedSlots = slots.value.filter(
+      //   (slot) => !newSlotIds?.includes(slot.id)
+      // );
 
       slots.value = addToCartData.value?.slots;
       ogSlots.value = useCloned(slots).cloned.value;
@@ -64,7 +74,8 @@ export const useCartStore = defineStore("cart", () => {
       slots.value = useCloned(ogSlots).cloned.value;
     }
 
-    return Promise.resolve(removedSlots);
+    // return Promise.resolve(removedSlots);
+    return Promise.resolve([]);
   };
 
   // slot reservation functionality
@@ -126,7 +137,7 @@ export const useCartStore = defineStore("cart", () => {
   return {
     slots,
     ogSlots,
-    lastVisitedService,
+    // lastVisitedService,
     cartReservationID,
     addToCart,
     addToCartStatus,

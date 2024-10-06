@@ -1,6 +1,6 @@
 import type { ApiInstitution } from "./institution";
 import type { ApiPlan } from "./plan";
-import type { ApiSchedule } from "./schedule";
+import type { ApiSchedule, DayOfWeek } from "./schedule";
 
 export type ApiServiceType = "sports" | "hairdressing" | "wellness" | "fitness";
 
@@ -24,6 +24,7 @@ export type ApiVariant = {
 
 export type ApiSlotDefinition = {
   id: number;
+  days_of_week: DayOfWeek[];
   time_start: string;
   time_end: string;
   duration: number;

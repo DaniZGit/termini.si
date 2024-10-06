@@ -72,8 +72,8 @@
               "
               :width="slotCellColWidth"
               :left-offset="slotCellColWidth * groupNum"
-              @selected="onSlotSelected"
-              @unselected="onSlotUnselected"
+              @selected="(slot: TimetableSlot) => emit('slotSelect', slot)"
+              @unselected="(slot: TimetableSlot) => emit('slotUnselect', slot)"
             ></ItemSlot>
           </div>
         </div>
@@ -85,7 +85,7 @@
 <script lang="ts" setup>
   import { format, parse } from "date-fns";
   import { sl } from "date-fns/locale";
-  import type { Timetable } from "~/types/misc";
+  import type { Timetable, TimetableSlot } from "~/types/misc";
 
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,
@@ -94,6 +94,8 @@
 
   const emit = defineEmits<{
     select: [event: Event, id: string];
+    slotSelect: [slot: TimetableSlot];
+    slotUnselect: [slot: TimetableSlot];
   }>();
 
   const slotCellRowHeight = 75; // in pixels
@@ -145,23 +147,6 @@
 
     return groupedTimetables;
   });
-
-  const onSlotSelected = (slot: TimeTableSlot) => {
-    // if user is not logged in, display "log in first" modal
-    // if (!user.value) {
-    //   showLoginRequiredModal.value = true;
-    //   return;
-    // }
-    // add to cart store
-    // cartStore.slots.push(slot);
-  };
-
-  const onSlotUnselected = (slot: TimeTableSlot) => {
-    // const slotIndex = cartStore.slots.findIndex((s) => s.id == slot.id);
-    // if (slotIndex >= 0) {
-    //   cartStore.slots.splice(slotIndex, 1);
-    // }
-  };
 </script>
 
 <style></style>

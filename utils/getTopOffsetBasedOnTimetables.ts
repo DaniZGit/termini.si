@@ -1,8 +1,8 @@
-import type { Timetable } from "~/types/misc";
+import type { Timetable, TimetableSlot } from "~/types/misc";
 
 export default (
   timetables: Timetable[],
-  slot: TimeTableSlot,
+  slot: TimetableSlot,
   slotCellHeight: number
 ) => {
   let slotMinutes = timeToMins(slot.time_start);

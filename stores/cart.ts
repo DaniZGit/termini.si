@@ -16,8 +16,9 @@ export const useCartStore = defineStore("cart", () => {
       date: slot.date,
       time_start: slot.time_start,
       time_end: slot.time_end,
-      variant_id: slot.variant.id,
-      slot_definition_id: slot.slot_definition.id,
+      variant_ids: Array.from(
+        new Set(slot.variants.map((variant) => variant.id))
+      ),
     }))
   );
   const {

@@ -47,6 +47,9 @@ dependencies:
   vue:
     specifier: ^3.4.27
     version: 3.4.27
+  vue-multiselect:
+    specifier: ^3.1.0
+    version: 3.1.0
   vue-router:
     specifier: ^4.3.3
     version: 4.3.3(vue@3.4.27)
@@ -8345,6 +8348,11 @@ packages:
 
   /vue-devtools-stub@0.1.0:
     resolution: {integrity: sha512-RutnB7X8c5hjq39NceArgXg28WZtZpGc3+J16ljMiYnFhKvd8hITxSWQSQ5bvldxMDU6gG5mkxl1MTQLXckVSQ==}
+
+  /vue-multiselect@3.1.0:
+    resolution: {integrity: sha512-+i/fjTqFBpaay9NP+lU7obBeNaw2DdFDFs4mqhsM0aEtKRdvIf7CfREAx2o2B4XDmPrBt1r7x1YCM3BOMLaUgQ==}
+    engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
+    dev: false
 
   /vue-observe-visibility@2.0.0-alpha.1(vue@3.4.27):
     resolution: {integrity: sha512-flFbp/gs9pZniXR6fans8smv1kDScJ8RS7rEpMjhVabiKeq7Qz3D9+eGsypncjfIyyU84saU88XZ0zjbD6Gq/g==}

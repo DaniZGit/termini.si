@@ -14,21 +14,22 @@
       <ScheduleViewDaily
         v-if="displayType == 'daily'"
         v-model:timetables="timetables"
-        @select="(e, id) => emit('select', e, id)"
+        @select="(variant, id) => emit('select', variant, id)"
+        @remove="(variant, id) => emit('remove', variant, id)"
         @slot-select="onSlotSelected"
         @slot-unselect="onSlotUnselected"
       ></ScheduleViewDaily>
       <ScheduleViewWeekly
         v-else-if="displayType == 'weekly'"
         v-model:timetables="timetables"
-        @select="(e, id) => emit('select', e, id)"
+        @select="(variant, id) => emit('select', variant, id)"
+        @remove="(variant, id) => emit('remove', variant, id)"
         @slot-select="onSlotSelected"
         @slot-unselect="onSlotUnselected"
       ></ScheduleViewWeekly>
       <ScheduleViewGrouped
         v-else-if="displayType == 'grouped'"
         v-model:timetables="timetables"
-        @select="(e, id) => emit('select', e, id)"
         @slot-select="onSlotSelected"
         @slot-unselect="onSlotUnselected"
       ></ScheduleViewGrouped>
@@ -101,6 +102,7 @@
   import type { PropType } from "vue";
   import type { ApiInstitutionDisplayType } from "~/types/institution";
   import type { Timetable, TimetableSlot } from "~/types/misc";
+  import type { ApiVariant } from "~/types/service";
 
   const { user } = useDirectusAuth();
   const cartStore = useCartStore();
@@ -119,7 +121,8 @@
   });
 
   const emit = defineEmits<{
-    select: [event: Event, id: string];
+    select: [variant: ApiVariant, timetableId: string];
+    remove: [variant: ApiVariant, timetableId: string];
   }>();
 
   onMounted(async () => {
@@ -173,13 +176,7 @@
 
   const onSlotUnselected = (slot: TimetableSlot) => {
     // find the unselected slot and remove it
-    const slotIndex = cartStore.slots.findIndex(
-      (s) =>
-        s.variant.id == slot.variant.id &&
-        s.date == slot.date &&
-        s.time_start == slot.time_start &&
-        s.time_start == slot.time_start
-    );
+    const slotIndex = cartStore.slots.findIndex((s) => doSlotsMatch(slot, s));
     if (slotIndex >= 0) {
       cartStore.slots.splice(slotIndex, 1);
     }

@@ -34,7 +34,7 @@
         class="flex flex-col justify-start text-center"
       >
         <div
-          class="flex flex-col justify-center items-center text-center mx-0.5"
+          class="flex flex-col justify-center items-center text-center mx-0.5 grow-0"
           :style="`height: ${headerColHeight}px;`"
         >
           <h4 class="font-semibold text-secondary whitespace-pre-line">
@@ -45,23 +45,26 @@
           >
             ( {{ format(timetable.date, "EEEE", { locale: sl }) }} )
           </h5>
-          <select
-            v-if="
-              timetable.service?.variants &&
-              timetable.service?.variants.length > 1
-            "
-            class="border-2 rounded-full px-2 text-sm w-full"
-            @change="emit('select', $event, timetable.id)"
-          >
-            <option
-              v-for="(variant, i) in timetable.service.variants"
-              :key="variant.id"
-              :value="variant.id"
-              :selected="i == 0"
+          <ClientOnly>
+            <UiMultiSelect
+              :options="timetable.service?.variants"
+              :multiple="timetable.service?.variant_selection === 'multiple'"
+              track-by="id"
+              label="title"
+              :searchable="false"
+              :allow-empty="false"
+              :show-labels="false"
+              @select="(selectedVariant: ApiVariant, id: number) => emit('select', selectedVariant, timetable.id)"
+              @remove="(removedVariant: ApiVariant, id: number) => emit('remove', removedVariant, timetable.id)"
             >
-              {{ variant.title }}
-            </option>
-          </select>
+              <template #option="props">
+                <span>{{ props.option.title }}</span>
+              </template>
+              <template #singleLabel="props">
+                <span class="line-clamp-1">{{ props.option.title }}</span>
+              </template>
+            </UiMultiSelect>
+          </ClientOnly>
         </div>
         <div class="grow relative">
           <ItemSlot
@@ -88,6 +91,7 @@
   import { format } from "date-fns";
   import { sl } from "date-fns/locale";
   import type { Timetable, TimetableSlot } from "~/types/misc";
+  import type { ApiVariant } from "~/types/service";
 
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,
@@ -95,7 +99,8 @@
   });
 
   const emit = defineEmits<{
-    select: [event: Event, id: string];
+    select: [variant: ApiVariant, timetableId: string];
+    remove: [variant: ApiVariant, timetableId: string];
     slotSelect: [slot: TimetableSlot];
     slotUnselect: [slot: TimetableSlot];
   }>();
@@ -123,4 +128,12 @@
   });
 </script>
 
-<style></style>
+<style scoped></style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
+<style>
+  .multiselect__content-wrapper {
+    position: static;
+    width: 200px;
+  }
+</style>

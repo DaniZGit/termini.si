@@ -37,26 +37,35 @@
           class="flex flex-col justify-center items-center text-center mx-0.5"
           :style="`height: ${headerColHeight}px;`"
         >
-          <h4 class="font-semibold text-secondary whitespace-pre-line">
+          <h4
+            class="font-semibold text-secondary whitespace-pre-line line-clamp-1"
+          >
             {{ timetable.title }}
           </h4>
-          <select
-            v-if="
-              timetable.service?.variants &&
-              timetable.service?.variants.length > 1
-            "
-            class="border-2 rounded-full px-2 text-sm w-full"
-            @change="emit('select', $event, timetable.id)"
-          >
-            <option
-              v-for="(variant, i) in timetable.service.variants"
-              :key="variant.id"
-              :value="variant.id"
-              :selected="i == 0"
+          <ClientOnly>
+            <UiMultiSelect
+              v-if="
+                timetable.service?.variants &&
+                timetable.service?.variants.length > 1
+              "
+              :options="timetable.service?.variants"
+              :multiple="timetable.service?.variant_selection === 'multiple'"
+              track-by="id"
+              label="title"
+              :searchable="false"
+              :allow-empty="false"
+              :show-labels="false"
+              @select="(selectedVariant: ApiVariant, id: number) => emit('select', selectedVariant, timetable.id)"
+              @remove="(removedVariant: ApiVariant, id: number) => emit('remove', removedVariant, timetable.id)"
             >
-              {{ variant.title }}
-            </option>
-          </select>
+              <template #option="props">
+                <span>{{ props.option.title }}</span>
+              </template>
+              <template #singleLabel="props">
+                <span class="line-clamp-1">{{ props.option.title }}</span>
+              </template>
+            </UiMultiSelect>
+          </ClientOnly>
         </div>
         <div class="grow relative">
           <ItemSlot
@@ -81,6 +90,7 @@
 
 <script lang="ts" setup>
   import type { Timetable, TimetableSlot } from "~/types/misc";
+  import type { ApiVariant } from "~/types/service";
 
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,
@@ -88,7 +98,8 @@
   });
 
   const emit = defineEmits<{
-    select: [event: Event, id: string];
+    select: [variant: ApiVariant, timetableId: string];
+    remove: [variant: ApiVariant, timetableId: string];
     slotSelect: [slot: TimetableSlot];
     slotUnselect: [slot: TimetableSlot];
   }>();
@@ -100,7 +111,7 @@
       (timetable) =>
         timetable.service?.variants && timetable.service.variants.length > 1
     );
-    if (timetableWithManyVariants) return 50;
+    if (timetableWithManyVariants) return 75;
 
     return 50;
   });

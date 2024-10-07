@@ -93,7 +93,6 @@
   });
 
   const emit = defineEmits<{
-    select: [event: Event, id: string];
     slotSelect: [slot: TimetableSlot];
     slotUnselect: [slot: TimetableSlot];
   }>();

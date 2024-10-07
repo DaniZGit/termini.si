@@ -29,8 +29,7 @@ export default (
         time_end: format(nextSlot, "HH:mm:ss"),
         duration: slotDefinition.duration,
         price: slotDefinition.price,
-        variant: variant,
-        slot_definition: slotDefinition,
+        variants: [variant],
       });
     }
     currentTime = nextSlot;

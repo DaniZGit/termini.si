@@ -81,7 +81,6 @@
           :display-type="institution.display_type"
           :status="servicesStatus"
           @select="onVariantSelect"
-          @remove="onVariantRemove"
         ></Schedule>
       </div>
     </div>
@@ -153,10 +152,9 @@
     Record<
       string,
       {
-        id?: number; // in case of selection type "single"
-        ids?: Set<number>; // in case of selection type "multiple"
+        serviceId: string;
+        variantId: number;
         date: Date;
-        selection: ApiServiceVariantSelection;
       }
     >
   >({});
@@ -174,8 +172,6 @@
           "id",
           "title",
           "type",
-          "variant_selection",
-          "variant_handling",
           "variants.id",
           "variants.title",
           "variants.slot_definitions.id",
@@ -184,6 +180,7 @@
           "variants.slot_definitions.time_end",
           "variants.slot_definitions.duration",
           "variants.slot_definitions.price",
+          "variants.service",
           "schedule.id",
           "schedule.title",
           "schedule.day_definitions.day_of_week",
@@ -248,26 +245,15 @@
         if (!dayDefinition) return;
 
         const slots: TimetableSlot[] = [];
-        const timetableID = `${service.title}-${dayName}`;
-        if (service.variant_selection == "single") {
-          slots.push(
-            ...generateSingleVariantSlots(
-              date,
-              service,
-              dayDefinition,
-              timetableID
-            )
-          );
-        } else if (service.variant_selection == "multiple") {
-          slots.push(
-            ...generateMultipleVariantSlots(
-              date,
-              service,
-              dayDefinition,
-              timetableID
-            )
-          );
-        }
+        const timetableID = `${service.id}-${dayName}`;
+        slots.push(
+          ...generateSingleVariantSlots(
+            date,
+            service,
+            dayDefinition,
+            timetableID
+          )
+        );
 
         newTimetables.push({
           id: timetableID,
@@ -294,15 +280,15 @@
     let variant = service.variants?.find(
       (variant) =>
         timetableID in selectedServiceVariants.value &&
-        selectedServiceVariants.value[timetableID].id == variant.id
+        selectedServiceVariants.value[timetableID].variantId == variant.id
     );
     if (!variant) {
       // if no selected variant, set first one as selected
       variant = service.variants[0];
       selectedServiceVariants.value[timetableID] = {
-        id: variant.id,
+        serviceId: service.id,
+        variantId: variant.id,
         date: date,
-        selection: service.variant_selection,
       };
     }
 
@@ -333,133 +319,18 @@
     return slots;
   };
 
-  // this doesnt work
-  // moramo ustvariti skupni urnik med vsemi variantami na podlagi slot_definitions
-  // treba pazit na to da slot_definition vsebuje razlicne case, duration in price
-  const generateMultipleVariantSlots = (
-    date: Date,
-    service: ApiService,
-    dayDefinition: ApiDayDefinition,
-    timetableID: string
-  ) => {
-    if (!service.variants || !service.variants?.length) return [];
-
-    // find selected variants (if one is selected)
-    let variants = service.variants?.filter(
-      (variant) =>
-        timetableID in selectedServiceVariants.value &&
-        selectedServiceVariants.value[timetableID].ids?.has(variant.id)
-    );
-    if (!variants.length) {
-      // if no selected variants, set first one as selected
-      variants = [service.variants[0]];
-      selectedServiceVariants.value[timetableID] = {
-        ids: new Set([service.variants[0].id]),
-        date: date,
-        selection: service.variant_selection,
-      };
-    }
-
-    let slots: TimetableSlot[] = [];
-    variants.forEach((variant) => {
-      variant.slot_definitions?.forEach((slotDefinition) => {
-        // only add slots if the setting is set for this day_of_week
-        if (!slotDefinition.days_of_week.includes(dayDefinition.day_of_week))
-          return;
-
-        // generate slot based on time_start, time_end and duration of the slot
-        const generatedSlots = generateSlots(
-          variant,
-          slotDefinition,
-          date,
-          max([
-            timeToDate(dayDefinition.time_start),
-            timeToDate(slotDefinition.time_start),
-          ]),
-          min([
-            timeToDate(dayDefinition.time_end),
-            timeToDate(slotDefinition.time_end),
-          ])
-        );
-
-        for (let i = 0; i < generatedSlots.length; i++) {
-          const generatedSlot = generatedSlots[i];
-          const slotIndex = slots.findIndex((slot) => {
-            return doSlotsMatch(slot, generatedSlot);
-          });
-          if (slotIndex >= 0) {
-            if (service.variant_handling === "max_value") {
-              slots[slotIndex] = {
-                ...slots[slotIndex],
-                duration: slots[slotIndex].duration + generatedSlot.duration,
-                price: slots[slotIndex].price + generatedSlot.price,
-                variants: slots[slotIndex].variants.concat(
-                  ...generatedSlot.variants
-                ),
-              };
-            } else if (service.variant_handling === "aggregate") {
-              slots[slotIndex] = {
-                ...slots[slotIndex],
-                duration: Math.max(
-                  slots[slotIndex].duration,
-                  generatedSlot.duration
-                ),
-                price: Math.max(slots[slotIndex].price, generatedSlot.price),
-                variants: slots[slotIndex].variants.concat(
-                  ...generatedSlot.variants
-                ),
-              };
-            }
-          } else {
-            slots.push(generatedSlot);
-          }
-        }
-      });
-    });
-
-    return slots;
-  };
-
   const onVariantSelect = (variant: ApiVariant, timetableId: string) => {
-    if (selectedServiceVariants.value[timetableId].selection === "single") {
-      selectedServiceVariants.value[timetableId].id = variant.id;
-    } else {
-      selectedServiceVariants.value[timetableId].ids?.add(variant.id);
-    }
+    selectedServiceVariants.value[timetableId].variantId = variant.id;
 
-    generateTimetables();
-  };
-
-  const onVariantRemove = (variant: ApiVariant, timetableId: string) => {
-    if (selectedServiceVariants.value[timetableId].selection === "multiple") {
-      // remove selected variant from the Set
-      selectedServiceVariants.value[timetableId].ids?.delete(variant.id);
-    }
-
-    // remove slots from the cart
-    // const updatedSlots = cartStore.slots.filter(
-    //   (slot) =>
-    //     slot.date.getTime() ==
-    //     selectedServiceVariants.value[timetableId].date.getTime()
-    // );
-
-    // if (selectedServiceVariants.value[timetableId].selection === "single") {
-    //   cartStore.slots = updatedSlots.filter(
-    //     (slot) =>
-    //       !slot.variants.some(
-    //         (v) => v.id == selectedServiceVariants.value[timetableId].id
-    //       )
-    //   );
-    // } else if (
-    //   selectedServiceVariants.value[timetableId].selection === "multiple"
-    // ) {
-    //   cartStore.slots = updatedSlots.filter(
-    //     (slot) =>
-    //       !slot.variants.some((v) =>
-    //         selectedServiceVariants.value[timetableId].ids?.has(v.id)
-    //       )
-    //   );
-    // }
+    // remove previous selected slots from the cart (based on variant)
+    const updatedSlots = cartStore.slots.filter(
+      (slot) =>
+        slot.variant.service !=
+          selectedServiceVariants.value[timetableId].serviceId ||
+        slot.date.getTime() !=
+          selectedServiceVariants.value[timetableId].date.getTime()
+    );
+    cartStore.slots = updatedSlots;
 
     generateTimetables();
   };

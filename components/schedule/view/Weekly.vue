@@ -48,7 +48,6 @@
           <ClientOnly>
             <UiMultiSelect
               :options="timetable.service?.variants"
-              :multiple="timetable.service?.variant_selection === 'multiple'"
               track-by="id"
               label="title"
               :searchable="false"

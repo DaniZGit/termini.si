@@ -49,7 +49,6 @@
                 timetable.service?.variants.length > 1
               "
               :options="timetable.service?.variants"
-              :multiple="timetable.service?.variant_selection === 'multiple'"
               track-by="id"
               label="title"
               :searchable="false"

@@ -1,4 +1,3 @@
-import { id } from "date-fns/locale";
 import { defineStore } from "pinia";
 import type { TimetableSlot } from "~/types/misc";
 
@@ -6,19 +5,15 @@ export const useCartStore = defineStore("cart", () => {
   const cartReservationID = ref("");
   const slots = ref<TimetableSlot[]>([]);
   const ogSlots = ref<TimetableSlot[]>([]);
-  // const lastVisitedService = ref<ApiService | null>(null);
 
   // add to cart functionality
-  // const slotIds = computed(() => slots.value.map((slot) => slot.id));
-  // const serviceId = computed(() => lastVisitedService.value?.id);
   const slotsQuery = computed(() =>
     slots.value.map((slot) => ({
       date: slot.date,
       time_start: slot.time_start,
       time_end: slot.time_end,
-      variant_ids: Array.from(
-        new Set(slot.variants.map((variant) => variant.id))
-      ),
+      variant_id: slot.variant.id,
+      slot_definition_id: slot.slot_definition.id,
     }))
   );
   const {

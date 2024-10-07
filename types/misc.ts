@@ -20,5 +20,6 @@ export type TimetableSlot = {
   time_end: string;
   duration: number;
   price: number;
-  variants: ApiVariant[];
+  variant: ApiVariant;
+  slot_definition: ApiSlotDefinition;
 };

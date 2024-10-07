@@ -12,8 +12,6 @@ export type ApiService = {
   content: string;
   type: ApiServiceType;
   display_type: "daily" | "weekly";
-  variant_selection: ApiServiceVariantSelection;
-  variant_handling: ApiServiceVariantHandling;
   institution: ApiInstitution;
   schedule: ApiSchedule | null;
   variants: ApiVariant[] | null;
@@ -23,6 +21,7 @@ export type ApiService = {
 export type ApiVariant = {
   id: number;
   title: string;
+  service: string;
   slot_definitions: ApiSlotDefinition[] | null;
 };
 

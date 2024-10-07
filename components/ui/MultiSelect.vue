@@ -3,7 +3,6 @@
     <Multiselect
       v-model="value"
       :options="options"
-      :multiple="multiple"
       :track-by="trackBy"
       :label="label"
       :searchable="searchable"
@@ -32,7 +31,6 @@
   const value = defineModel();
   const props = defineProps({
     options: null,
-    multiple: Boolean,
     trackBy: String,
     label: String,
     searchable: Boolean,

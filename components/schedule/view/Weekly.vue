@@ -37,22 +37,21 @@
           class="flex flex-col justify-center items-center text-center mx-0.5 grow-0"
           :style="`height: ${headerColHeight}px;`"
         >
-          <h4 class="font-semibold text-secondary whitespace-pre-line">
-            {{ timetable.title }}
-          </h4>
-          <h5
-            class="text-sm font-semibold text-secondary whitespace-pre-line capitalize"
-          >
-            ( {{ format(timetable.date, "EEEE", { locale: sl }) }} )
-          </h5>
+          <div>
+            <h4 class="font-semibold text-secondary whitespace-pre-line">
+              {{ timetable.title }}
+            </h4>
+            <h5
+              class="text-sm font-semibold text-secondary whitespace-pre-line capitalize"
+            >
+              ( {{ format(timetable.date, "EEEE", { locale: sl }) }} )
+            </h5>
+          </div>
           <ClientOnly>
             <UiMultiSelect
               :options="timetable.service?.variants"
               track-by="id"
               label="title"
-              :searchable="false"
-              :allow-empty="false"
-              :show-labels="false"
               @select="(selectedVariant: ApiVariant, id: number) => emit('select', selectedVariant, timetable.id)"
               @remove="(removedVariant: ApiVariant, id: number) => emit('remove', removedVariant, timetable.id)"
             >
@@ -104,17 +103,15 @@
     slotUnselect: [slot: TimetableSlot];
   }>();
 
-  const slotCellRowHeight = 75; // in pixels
-  const slotCellColWidth = 120; // in pixels
-  const headerColHeight = computed(() => {
-    const timetableWithManyVariants = timetables.value.find(
-      (timetable) =>
-        timetable.service?.variants && timetable.service.variants.length > 1
-    );
-    if (timetableWithManyVariants) return 75;
-
-    return 50;
-  });
+  const headerColHeight = computed(() =>
+    getHeaderColHeightAcrossTimetables(timetables.value)
+  );
+  const slotCellColWidth = computed(() =>
+    getSlotCellColWidthAcrossTimetables(timetables.value)
+  );
+  const slotCellRowHeight = computed(() =>
+    getSlotCellColHeightAcrossTimetables(timetables.value)
+  );
 
   const getSortedTimetables = computed(() => {
     return timetables.value.sort((a, b) => {
@@ -129,10 +126,3 @@
 
 <style scoped></style>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
-
-<style>
-  .multiselect__content-wrapper {
-    position: static;
-    width: 200px;
-  }
-</style>

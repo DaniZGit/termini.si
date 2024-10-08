@@ -97,17 +97,15 @@
     slotUnselect: [slot: TimetableSlot];
   }>();
 
-  const slotCellRowHeight = 75; // in pixels
-  const slotCellColWidth = 120; // in pixels
-  const headerColHeight = computed(() => {
-    const timetableWithManyVariants = timetables.value.find(
-      (timetable) =>
-        timetable.service?.variants && timetable.service.variants.length > 1
-    );
-    if (timetableWithManyVariants) return 75;
-
-    return 50;
-  });
+  const headerColHeight = computed(() =>
+    getHeaderColHeightAcrossTimetables(timetables.value)
+  );
+  const slotCellColWidth = computed(() =>
+    getSlotCellColWidthAcrossTimetables(timetables.value)
+  );
+  const slotCellRowHeight = computed(() =>
+    getSlotCellColHeightAcrossTimetables(timetables.value)
+  );
 
   const getGroupedTimetables = computed(() => {
     const groupedTimetables: Record<string, Timetable[][]> = {};

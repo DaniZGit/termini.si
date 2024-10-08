@@ -51,9 +51,6 @@
               :options="timetable.service?.variants"
               track-by="id"
               label="title"
-              :searchable="false"
-              :allow-empty="false"
-              :show-labels="false"
               @select="(selectedVariant: ApiVariant, id: number) => emit('select', selectedVariant, timetable.id)"
               @remove="(removedVariant: ApiVariant, id: number) => emit('remove', removedVariant, timetable.id)"
             >
@@ -103,17 +100,15 @@
     slotUnselect: [slot: TimetableSlot];
   }>();
 
-  const slotCellRowHeight = 75; // in pixels
-  const slotCellColWidth = 120; // in pixels
-  const headerColHeight = computed(() => {
-    const timetableWithManyVariants = timetables.value.find(
-      (timetable) =>
-        timetable.service?.variants && timetable.service.variants.length > 1
-    );
-    if (timetableWithManyVariants) return 75;
-
-    return 50;
-  });
+  const headerColHeight = computed(() =>
+    getHeaderColHeightAcrossTimetables(timetables.value)
+  );
+  const slotCellColWidth = computed(() =>
+    getSlotCellColWidthAcrossTimetables(timetables.value)
+  );
+  const slotCellRowHeight = computed(() =>
+    getSlotCellColHeightAcrossTimetables(timetables.value)
+  );
 </script>
 
 <style></style>

@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { format } from "date-fns";
+  import { format, isAfter, isBefore } from "date-fns";
   import { sl } from "date-fns/locale";
   import type { Timetable, TimetableSlot } from "~/types/misc";
   import type { ApiVariant } from "~/types/service";
@@ -117,8 +117,8 @@
     return timetables.value.sort((a, b) => {
       const aDate = new Date(a.date);
       const bDate = new Date(b.date);
-      if (aDate.getTime() < bDate.getTime()) return -1;
-      else if (aDate.getTime() > bDate.getTime()) return 1;
+      if (isBefore(aDate, bDate)) return -1;
+      else if (isAfter(aDate, bDate)) return 1;
       return 0;
     });
   });

@@ -1,4 +1,5 @@
-import type { ApiService } from "./service";
+import type { ApiReservation } from "./reservation";
+import type { ApiService, ApiSlotDefinition } from "./service";
 
 export type DayOfWeek =
   | "monday"
@@ -25,10 +26,9 @@ export type ApiDayDefinition = {
 };
 
 export type ApiSlot = {
-  id: string;
-  days_of_weeks: DayOfWeek[];
-  start_time: string;
-  end_time: string;
-  available: boolean;
-  price: number;
+  date: string;
+  time_start: string;
+  time_end: string;
+  slot_definition: ApiSlotDefinition;
+  reservations: ApiReservation[];
 };

@@ -70,17 +70,18 @@
     >
       <h2 class="text-2xl font-semibold text-secondary">Termini</h2>
       <div class="flex flex-col gap-y-4">
-        {{ cartStore.slots }}
         <UiDatePicker
           v-model="selectedDate"
           :display-type="institution?.display_type"
-          @update:model-value="onDateSelect"
+          @update:model-value="onDatePicked"
         ></UiDatePicker>
 
         <Schedule
           :timetables="timetables"
           :display-type="institution.display_type"
-          :status="servicesStatus"
+          :loading="
+            servicesStatus == 'pending' || reservedSlotsStatus == 'pending'
+          "
           @select="onVariantSelect"
         ></Schedule>
       </div>
@@ -90,23 +91,30 @@
 
 <script lang="ts" setup>
   import { eachDayOfInterval, format, max, min } from "date-fns";
-  import { sl } from "date-fns/locale";
   import { toZonedTime } from "date-fns-tz";
   import { register } from "swiper/element";
   import type { ApiInstitution } from "~/types/institution";
   import type { Timetable, TimetableSlot } from "~/types/misc";
-  import type { ApiDayDefinition } from "~/types/schedule";
-  import type {
-    ApiService,
-    ApiServiceVariantSelection,
-    ApiVariant,
-  } from "~/types/service";
+  import type { ApiDayDefinition, ApiSlot } from "~/types/schedule";
+  import type { ApiService, ApiVariant } from "~/types/service";
   register(); // registers swiper elements
 
   const { readItems } = useDirectusItems();
   const route = useRoute();
 
   const cartStore = useCartStore();
+
+  // datepicker stuff
+  const selectedDate = ref<Date | [string, string]>(new Date());
+  const onDatePicked = async () => {
+    selectedServiceVariants.value = {};
+    cartStore.slots = [];
+
+    await fetchServices();
+    await fetchReservedSlots();
+
+    generateTimetables();
+  };
 
   onMounted(async () => {
     // if looking at different institution, clear the current cart
@@ -150,7 +158,6 @@
     }
   );
 
-  // services data request
   const selectedServiceVariants = ref<
     Record<
       string,
@@ -161,6 +168,8 @@
       }
     >
   >({});
+
+  // services data request
   const {
     data: services,
     error: servicesError,
@@ -212,12 +221,57 @@
     }
   );
 
-  // datepicker stuff
-  const selectedDate = ref<Date | [string, string]>(new Date());
-  const onDateSelect = async () => {
-    await fetchServices();
-    generateTimetables();
-  };
+  // reserved slots filter
+  const reservedSlotsFilter = computed(() => {
+    if (Array.isArray(selectedDate.value)) {
+      return {
+        _and: [
+          {
+            date: {
+              _gte: selectedDate.value[0],
+            },
+          },
+          {
+            date: {
+              _lte: selectedDate.value[1],
+            },
+          },
+        ],
+      };
+    } else {
+      return {
+        date: {
+          _eq: selectedDate.value,
+        },
+      };
+    }
+  });
+
+  // reserved slots data request
+  const {
+    data: reservedSlots,
+    error: reservedSlotsError,
+    status: reservedSlotsStatus,
+    execute: fetchReservedSlots,
+  } = await useLazyAsyncData<ApiSlot[]>(
+    "slots",
+    () =>
+      // @ts-ignore
+      readItems("slots", {
+        fields: [
+          "date",
+          "time_start",
+          "time_end",
+          "slot_definition.id",
+          "slot_definition.variant.id",
+          "slot_definition.variant.service.id",
+        ],
+        filter: reservedSlotsFilter.value,
+      }),
+    {
+      immediate: false,
+    }
+  );
 
   const timetables = ref<Timetable[]>([]);
   const generateTimetables = () => {
@@ -230,17 +284,17 @@
         end: selectedDate.value[1],
       });
 
-      // convert dates to sl zimezone
       timetables.value = generateTimetablesFromDates(
-        dates.map((date) => toZonedTime(date, timezone))
+        dates.map((date) => toZonedTime(date, timezone)) // convert date to sl zimezone
       );
     } else {
       // daily display
-      // convert date to sl zimezone
       timetables.value = generateTimetablesFromDates([
-        toZonedTime(selectedDate.value, timezone),
+        toZonedTime(selectedDate.value, timezone), // convert date to sl zimezone
       ]);
     }
+
+    return timetables;
   };
 
   const generateTimetablesFromDates = (dates: Date[]) => {
@@ -322,7 +376,8 @@
           timeToDate(dayDefinition.time_end),
           timeToDate(slotDefinition.time_end),
         ]),
-        slotDefinition
+        slotDefinition,
+        reservedSlots.value ?? []
       );
 
       slots.push(...generatedSlots);
@@ -335,14 +390,19 @@
     // remove previous selected slots from the cart (based on variant)
     const updatedSlots = cartStore.slots.filter(
       (slot) =>
-        slot.slot_definition.variant.service.id == variant.service.id &&
-        slot.slot_definition.variant.id == variant.id &&
-        new Date(slot.date).getTime() ==
-          selectedServiceVariants.value[timetableId].date.getTime()
+        slot.slot_definition.variant.service.id !=
+          selectedServiceVariants.value[timetableId].serviceId ||
+        slot.slot_definition.variant.id !=
+          selectedServiceVariants.value[timetableId].variantId ||
+        !doDatesMatch(
+          slot.date,
+          selectedServiceVariants.value[timetableId].date
+        )
     );
     cartStore.slots = updatedSlots;
 
-    selectedServiceVariants.value[timetableId].variantId = variant.id;
+    if (timetableId in selectedServiceVariants.value)
+      selectedServiceVariants.value[timetableId].variantId = variant.id;
 
     generateTimetables();
   };

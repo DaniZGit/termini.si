@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="status == 'idle' || status == 'pending'">
+    <div v-if="loading">
       <div
         class="w-full h-full flex flex-col items-center justify-center gap-y-8 mt-32 px-4"
       >
@@ -50,10 +50,6 @@
         size="64"
         class="text-neutral-darkGray"
       />
-    </div>
-
-    <div>
-      {{ cartStore.addToCartStatus }}
     </div>
 
     <!-- Cart -->
@@ -115,8 +111,8 @@
     displayType: {
       type: String as PropType<ApiInstitutionDisplayType>,
     },
-    status: {
-      type: String as PropType<AsyncDataRequestStatus>,
+    loading: {
+      type: Boolean,
     },
   });
 

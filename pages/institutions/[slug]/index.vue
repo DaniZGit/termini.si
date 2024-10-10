@@ -113,13 +113,9 @@
     await fetchServices();
     await fetchReservedSlots();
 
+    // re-generate timetables
     generateTimetables();
   };
-
-  onMounted(async () => {
-    // if looking at different institution, clear the current cart
-    cartStore.slots = [];
-  });
 
   // institution data request
   const {
@@ -273,6 +269,39 @@
     }
   );
 
+  onMounted(async () => {
+    // if looking at different institution, clear the current cart
+    cartStore.slots = [];
+
+    // realtime data - maybe can move this outside the onmounted hook - https://github.com/Intevel/nuxt-directus/issues/264
+    const client = useDirectusRealtime();
+    await client.connect();
+    const { subscription } = await client.subscribe("slots", {
+      event: "create",
+      query: {
+        fields: [
+          "date",
+          "time_start",
+          "time_end",
+          "slot_definition.id",
+          "slot_definition.variant.id",
+          "slot_definition.variant.service.id",
+        ],
+      },
+    });
+    for await (const item of subscription) {
+      console.log("slot update", item);
+      if (!item.data || !timetables.value) continue;
+      const createdSlots = item.data as ApiSlot[];
+
+      // add slots to the array of existing reserved slots
+      reservedSlots.value?.push(...createdSlots);
+
+      // re-generate timetables
+      generateTimetables();
+    }
+  });
+
   const timetables = ref<Timetable[]>([]);
   const generateTimetables = () => {
     const timezone = "Europe/Ljubljana";
@@ -404,6 +433,7 @@
     if (timetableId in selectedServiceVariants.value)
       selectedServiceVariants.value[timetableId].variantId = variant.id;
 
+    // re-generate timetables
     generateTimetables();
   };
 </script>

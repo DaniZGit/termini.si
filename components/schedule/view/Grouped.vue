@@ -122,8 +122,8 @@
         ) {
           const group = groupedTimetables[timetable.date.toString()][i];
           const timetablesIntersect = group.some((groupTimetable) => {
-            const doesIntersect = timetable.slots?.some((slot) =>
-              groupTimetable.slots?.some((groupSlot) =>
+            const doesIntersect = timetable.slots.some((slot) =>
+              groupTimetable.slots.some((groupSlot) =>
                 doSlotsIntersect(slot, groupSlot)
               )
             );

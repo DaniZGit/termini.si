@@ -10,7 +10,7 @@ export type Timetable = {
   id: string;
   title: string;
   date: Date;
-  slots: TimetableSlot[] | null;
+  slots: TimetableSlot[];
   service: ApiService | null;
 };
 

@@ -121,36 +121,11 @@
     remove: [variant: ApiVariant, timetableId: string];
   }>();
 
-  onMounted(async () => {
-    // realtime data - maybe can move this outside the onmounted hook - https://github.com/Intevel/nuxt-directus/issues/264
-    // const client = useDirectusRealtime();
-    // await client.connect();
-    // const { subscription } = await client.subscribe("slots", {
-    //   event: "update",
-    //   query: {
-    //     fields: ["id", "available", "date.id"],
-    //   },
-    // });
-    // for await (const item of subscription) {
-    //   console.log("slot update", item);
-    //   if (!item.data || !timetables.value) continue;
-    //   const changedSlots = item.data as ApiSlot[];
-    //   changedSlots.forEach((changedSlot) => {
-    //     timetables.value.forEach((timetable) => {
-    //       const slot = timetable.slots?.find(
-    //         (slot) => slot.id == changedSlot.id
-    //       );
-    //       if (slot) slot.available = changedSlot.available;
-    //     });
-    //   });
-    // }
-  });
-
   const slotsExist = computed(() => {
     if (!timetables.value) return false;
 
     const slotsAmount = timetables.value.reduce((sum, timetable) => {
-      if (!timetable.slots?.length) return sum;
+      if (!timetable.slots.length) return sum;
       return sum + timetable.slots.length;
     }, 0);
 

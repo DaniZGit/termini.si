@@ -110,13 +110,17 @@
   const getGroupedTimetables = computed(() => {
     const groupedTimetables: Record<string, Timetable[][]> = {};
     timetables.value.forEach((timetable) => {
-      if (!(timetable.date in groupedTimetables)) {
-        groupedTimetables[timetable.date] = [[timetable]];
+      if (!(timetable.date.toString() in groupedTimetables)) {
+        groupedTimetables[timetable.date.toString()] = [[timetable]];
       } else {
         // check in every group if there is free space for this timeslot
         let foundAFreeGroup = false;
-        for (let i = 0; i < groupedTimetables[timetable.date].length; i++) {
-          const group = groupedTimetables[timetable.date][i];
+        for (
+          let i = 0;
+          i < groupedTimetables[timetable.date.toString()].length;
+          i++
+        ) {
+          const group = groupedTimetables[timetable.date.toString()][i];
           const timetablesIntersect = group.some((groupTimetable) => {
             const doesIntersect = timetable.slots?.some((slot) =>
               groupTimetable.slots?.some((groupSlot) =>
@@ -138,7 +142,7 @@
 
         // if timetable couldnt join a group, create a new group
         if (!foundAFreeGroup)
-          groupedTimetables[timetable.date].push([timetable]);
+          groupedTimetables[timetable.date.toString()].push([timetable]);
       }
     });
 

@@ -149,7 +149,7 @@
 
   const getTotalAmount = () => {
     const total = cartStore.slots.reduce((sum, slot) => {
-      return sum + parseFloat(slot.price.toString());
+      return sum + parseFloat(slot.slot_definition.price.toString());
     }, 0);
 
     return total;

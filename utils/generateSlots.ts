@@ -3,11 +3,10 @@ import type { TimetableSlot } from "~/types/misc";
 import type { ApiSlotDefinition, ApiVariant } from "~/types/service";
 
 export default (
-  variant: ApiVariant,
-  slotDefinition: ApiSlotDefinition,
   date: Date,
   timeStart: string | Date,
-  timeEnd: string | Date
+  timeEnd: string | Date,
+  slotDefinition: ApiSlotDefinition
 ) => {
   // Convert time strings to Date objects (use any reference date)
   const startTime =
@@ -24,12 +23,9 @@ export default (
       nextSlot.getTime() === endTime.getTime()
     ) {
       slots.push({
-        date: date,
+        date: format(date, "yyyy-MM-dd"),
         time_start: format(currentTime, "HH:mm:ss"),
         time_end: format(nextSlot, "HH:mm:ss"),
-        duration: slotDefinition.duration,
-        price: slotDefinition.price,
-        variant: variant,
         slot_definition: slotDefinition,
       });
     }

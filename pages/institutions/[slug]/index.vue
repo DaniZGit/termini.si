@@ -70,6 +70,7 @@
     >
       <h2 class="text-2xl font-semibold text-secondary">Termini</h2>
       <div class="flex flex-col gap-y-4">
+        {{ cartStore.slots }}
         <UiDatePicker
           v-model="selectedDate"
           :display-type="institution?.display_type"
@@ -89,6 +90,8 @@
 
 <script lang="ts" setup>
   import { eachDayOfInterval, format, max, min } from "date-fns";
+  import { sl } from "date-fns/locale";
+  import { toZonedTime } from "date-fns-tz";
   import { register } from "swiper/element";
   import type { ApiInstitution } from "~/types/institution";
   import type { Timetable, TimetableSlot } from "~/types/misc";
@@ -180,7 +183,9 @@
           "variants.slot_definitions.time_end",
           "variants.slot_definitions.duration",
           "variants.slot_definitions.price",
-          "variants.service",
+          "variants.slot_definitions.variant.id",
+          "variants.slot_definitions.variant.service.id",
+          "variants.service.id",
           "schedule.id",
           "schedule.title",
           "schedule.day_definitions.day_of_week",
@@ -216,6 +221,8 @@
 
   const timetables = ref<Timetable[]>([]);
   const generateTimetables = () => {
+    const timezone = "Europe/Ljubljana";
+
     if (Array.isArray(selectedDate.value)) {
       // weekly display
       const dates = eachDayOfInterval({
@@ -223,10 +230,16 @@
         end: selectedDate.value[1],
       });
 
-      timetables.value = generateTimetablesFromDates(dates);
+      // convert dates to sl zimezone
+      timetables.value = generateTimetablesFromDates(
+        dates.map((date) => toZonedTime(date, timezone))
+      );
     } else {
       // daily display
-      timetables.value = generateTimetablesFromDates([selectedDate.value]);
+      // convert date to sl zimezone
+      timetables.value = generateTimetablesFromDates([
+        toZonedTime(selectedDate.value, timezone),
+      ]);
     }
   };
 
@@ -258,7 +271,7 @@
         newTimetables.push({
           id: timetableID,
           title: service.title,
-          date: date.toString(),
+          date: date,
           slots: slots,
           service: service,
         });
@@ -300,8 +313,6 @@
 
       // generate slot based on time_start, time_end and duration of the slot
       const generatedSlots = generateSlots(
-        variant,
-        slotDefinition,
         date,
         max([
           timeToDate(dayDefinition.time_start),
@@ -310,7 +321,8 @@
         min([
           timeToDate(dayDefinition.time_end),
           timeToDate(slotDefinition.time_end),
-        ])
+        ]),
+        slotDefinition
       );
 
       slots.push(...generatedSlots);
@@ -320,17 +332,17 @@
   };
 
   const onVariantSelect = (variant: ApiVariant, timetableId: string) => {
-    selectedServiceVariants.value[timetableId].variantId = variant.id;
-
     // remove previous selected slots from the cart (based on variant)
     const updatedSlots = cartStore.slots.filter(
       (slot) =>
-        slot.variant.service !=
-          selectedServiceVariants.value[timetableId].serviceId ||
-        slot.date.getTime() !=
+        slot.slot_definition.variant.service.id == variant.service.id &&
+        slot.slot_definition.variant.id == variant.id &&
+        new Date(slot.date).getTime() ==
           selectedServiceVariants.value[timetableId].date.getTime()
     );
     cartStore.slots = updatedSlots;
+
+    selectedServiceVariants.value[timetableId].variantId = variant.id;
 
     generateTimetables();
   };

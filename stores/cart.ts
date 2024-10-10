@@ -12,8 +12,7 @@ export const useCartStore = defineStore("cart", () => {
       date: slot.date,
       time_start: slot.time_start,
       time_end: slot.time_end,
-      variant_id: slot.variant.id,
-      slot_definition_id: slot.slot_definition.id,
+      slot_definition: slot.slot_definition.id,
     }))
   );
   const {
@@ -50,8 +49,6 @@ export const useCartStore = defineStore("cart", () => {
 
   const addToCart = async () => {
     await execAddToCart();
-    ogSlots.value = useCloned(slots).cloned.value;
-    return [];
 
     // let removedSlots: TimetableSlot[] = [];
     if (!addToCartError.value && addToCartData.value) {

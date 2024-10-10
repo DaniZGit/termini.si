@@ -9,17 +9,14 @@ export type InstitutionsFilter = {
 export type Timetable = {
   id: string;
   title: string;
-  date: string;
+  date: Date;
   slots: TimetableSlot[] | null;
   service: ApiService | null;
 };
 
 export type TimetableSlot = {
-  date: Date;
+  date: string;
   time_start: string;
   time_end: string;
-  duration: number;
-  price: number;
-  variant: ApiVariant;
   slot_definition: ApiSlotDefinition;
 };

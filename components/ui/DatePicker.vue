@@ -18,6 +18,8 @@
         :format="datepickerFormat"
         :auto-apply="true"
         :disable-year-select="true"
+        locale="sl"
+        :timezone="timezone"
         position="center"
         :ui="{
           input: 'text-center',
@@ -56,6 +58,7 @@
 
   // date picker
   const datePicker = ref<DatePickerInstance>(null);
+  const timezone = "Europe/Ljubljana";
   const selectedDate = defineModel({
     type: Object as PropType<Date | [string, string]>,
     default: new Date(),

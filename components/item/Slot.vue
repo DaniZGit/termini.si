@@ -36,7 +36,7 @@
       {{ slot?.time_end.substring(0, 5) }}
     </span>
     <span class="absolute bottom-0 right-0 text-[10px] p-1">
-      {{ getPriceNice(slot?.price.toString()) }}
+      {{ getPriceNice(slot?.slot_definition.price.toString()) }}
     </span>
   </div>
 </template>
@@ -48,7 +48,9 @@
   const cartStore = useCartStore();
 
   const selected = computed(() => {
-    return cartStore.slots.some((slot) => doSlotsMatch(slot, props.slot));
+    return cartStore.slots.some(
+      (slot) => props.slot && doSlotsMatch(slot, props.slot)
+    );
   });
 
   const props = defineProps({
@@ -72,9 +74,11 @@
   const onClick = () => {
     if (
       !props.slot ||
-      // props.slot.booked_by_user?.id ||
+      cartStore.addToCartStatus === "pending" ||
       (props.status != "available" &&
-        !cartStore.slots.some((slot) => doSlotsMatch(slot, props.slot)))
+        !cartStore.slots.some(
+          (slot) => props.slot && doSlotsMatch(slot, props.slot)
+        ))
     )
       return;
 

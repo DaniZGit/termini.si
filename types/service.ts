@@ -30,6 +30,7 @@ export type ApiSlotDefinition = {
   days_of_week: DayOfWeek[];
   time_start: string;
   time_end: string;
+  capacity: number;
   duration: number;
   price: number;
   variant: ApiVariant;

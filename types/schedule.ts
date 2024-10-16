@@ -22,6 +22,7 @@ export type ApiDayDefinition = {
   day_of_week: DayOfWeek;
   time_start: string;
   time_end: string;
+  capacity: number;
   schedule: ApiSchedule | null;
 };
 

@@ -2,11 +2,11 @@
   <div
     class="flex justify-center items-center absolute top-0 left-0 right-0 border-2 border-neutral-white text-neutral-white"
     :class="
-      selected
+      getSlotStatus == 'free'
+        ? 'bg-primary'
+        : getSlotStatus == 'user-held' || getSlotStatus == 'user-confirmed'
         ? 'bg-secondary'
-        : status != 'available'
-        ? 'bg-neutral-gray'
-        : 'bg-primary'
+        : 'bg-neutral-gray'
     "
     :style="`
       height: ${height}px;
@@ -20,16 +20,17 @@
       {{ slot?.time_start.substring(0, 5) }}
     </span>
     <!-- Weather stuff -->
-    <!-- <span
-      v-if="slot?.current_temp"
-      class="absolute top-0 right-0 text-[10px] p-1"
-    >
-      {{ slot?.current_temp }} °C
-    </span> -->
+    <span class="absolute top-0 right-0 text-[10px] p-1"> {{ 17 }} °C</span>
     <span v-if="title">{{ title }}</span>
     <span v-else>
       {{
-        selected ? "Izbrano" : status != "available" ? "Zasedeno" : "Rezerviraj"
+        getSlotStatus == "free"
+          ? "Rezerviraj"
+          : getSlotStatus == "user-held"
+          ? "Izbrano"
+          : getSlotStatus == "user-confirmed" || getSlotStatus == "other-taken"
+          ? "Rezervirano"
+          : "Error"
       }}
     </span>
     <span class="absolute bottom-0 left-0 text-[10px] p-1">
@@ -46,12 +47,6 @@
   import type { TimetableSlot } from "~/types/misc";
 
   const cartStore = useCartStore();
-
-  const selected = computed(() => {
-    return cartStore.slots.some(
-      (slot) => props.slot && doSlotsMatch(slot, props.slot)
-    );
-  });
 
   const props = defineProps({
     slot: Object as PropType<TimetableSlot>,
@@ -71,14 +66,26 @@
     unselected: [slot: TimetableSlot];
   }>();
 
+  const selected = computed(() => {
+    return cartStore.slots.some(
+      (slot) => props.slot && doSlotsMatch(slot, props.slot)
+    );
+  });
+
+  // "free", "user-held", "user-confirmed", "other-taken"
+  const getSlotStatus = computed(() => {
+    if (selected.value) return "user-held";
+    if (!props.slot || !props.slot?.is_reserved) return "free";
+    if (!props.slot.is_reserved_by_active_user) return "other-taken";
+
+    return "user-confirmed";
+  });
+
   const onClick = () => {
     if (
       !props.slot ||
       cartStore.addToCartStatus === "pending" ||
-      (props.status != "available" &&
-        !cartStore.slots.some(
-          (slot) => props.slot && doSlotsMatch(slot, props.slot)
-        ))
+      (getSlotStatus.value != "free" && getSlotStatus.value != "user-held")
     )
       return;
 

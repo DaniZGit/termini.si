@@ -1,12 +1,13 @@
 import { add, format, isBefore, isEqual, startOfDay } from "date-fns";
 import type { TimetableSlot } from "~/types/misc";
-import type { ApiSlot } from "~/types/schedule";
+import type { ApiDayDefinition, ApiSlot } from "~/types/schedule";
 import type { ApiSlotDefinition } from "~/types/service";
 
 export default (
   date: Date,
   timeStart: string | Date,
   timeEnd: string | Date,
+  dayDefinition: ApiDayDefinition,
   slotDefinition: ApiSlotDefinition,
   reservedSlots: ApiSlot[]
 ) => {
@@ -26,10 +27,20 @@ export default (
     ) {
       const currTimeString = format(currentTime, "HH:mm:ss");
       const nextSlotTimeString = format(nextSlot, "HH:mm:ss");
-      // check if slot intersects with any of the reservedSlots
-      let isReserved = reservedSlots.some(
+      let canReserve = true;
+
+      // find intersecting slots
+      const { user } = useDirectusAuth();
+      let intersectingSlots = reservedSlots.filter(
         (reservedSlot) =>
-          reservedSlot.slot_definition.variant.service.id ===
+          !reservedSlot.reservations.some(
+            // check if active user has the slot reserved
+            (reservation) =>
+              reservation.user.id == user.value?.id &&
+              (reservation.status == "held" ||
+                reservation.status == "confirmed")
+          ) &&
+          reservedSlot.slot_definition.variant.service.id ==
             slotDefinition.variant.service.id &&
           doDatesMatch(date, reservedSlot.date) &&
           doSlotsIntersect(
@@ -38,20 +49,43 @@ export default (
           )
       );
 
-      if (isReserved) {
-        console.log("a slot is reserved");
-        console.log(reservedSlots);
-        console.log(currTimeString, nextSlotTimeString);
+      // check if adding this slot would excess schedule dayDefinition specified capacity
+      let dayDefinitionCapacitySum = intersectingSlots.length;
+      if (dayDefinitionCapacitySum + 1 > dayDefinition.capacity) {
+        canReserve = false;
       }
 
-      if (!isReserved) {
-        slots.push({
-          date: format(date, "yyyy-MM-dd"),
-          time_start: currTimeString,
-          time_end: nextSlotTimeString,
-          slot_definition: slotDefinition,
-        });
+      // check if adding this slot would excess slot_definition specified capacity
+      let slotDefinitionCapacitySum = intersectingSlots.reduce(
+        (sum, intersectingSlot) =>
+          sum +
+          (intersectingSlot.slot_definition.id == slotDefinition.id ? 1 : 0),
+        0
+      );
+      if (slotDefinitionCapacitySum + 1 > slotDefinition.capacity) {
+        canReserve = false;
       }
+
+      // if slot time is reserved, check if intersecting slots are from the same variant
+      // const sameVariantIntersectingSlots = intersectingSlots.filter(
+      //   (intersectingSlot) =>
+      //     intersectingSlot.slot_definition.variant.id ==
+      //     slotDefinition.variant.id
+      // );
+      // if (canReserve || (!canReserve && sameVariantIntersectingSlots.length)) {
+      slots.push({
+        date: format(date, "yyyy-MM-dd"),
+        time_start: currTimeString,
+        time_end: nextSlotTimeString,
+        slot_definition: slotDefinition,
+        is_reserved: !canReserve,
+        is_reserved_by_active_user: intersectingSlots.some((intersectingSlot) =>
+          intersectingSlot.reservations.some(
+            (reservation) => reservation.user.id == user.value?.id
+          )
+        ),
+      });
+      // }
     }
     currentTime = nextSlot;
   }

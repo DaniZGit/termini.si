@@ -7,7 +7,9 @@ type TimeRange = {
   [key: string]: any;
 };
 
-export default (slot1: TimeRange, slot2: TimeRange) => {
+export default (slot1?: TimeRange, slot2?: TimeRange) => {
+  if (!slot1 || !slot2) return false;
+
   // Check if one slot starts before the other ends and ends after the other starts
   const firstTimeStartDate = timeToDate(slot1.time_start);
   const firstTimeEndDate = timeToDate(slot1.time_end);

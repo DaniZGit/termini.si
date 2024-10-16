@@ -186,6 +186,7 @@
           "variants.slot_definitions.days_of_week",
           "variants.slot_definitions.time_start",
           "variants.slot_definitions.time_end",
+          "variants.slot_definitions.capacity",
           "variants.slot_definitions.duration",
           "variants.slot_definitions.price",
           "variants.slot_definitions.variant.id",
@@ -196,6 +197,7 @@
           "schedule.day_definitions.day_of_week",
           "schedule.day_definitions.time_start",
           "schedule.day_definitions.time_end",
+          "schedule.day_definitions.capacity",
         ],
         filter: {
           institution: {
@@ -261,6 +263,13 @@
           "slot_definition.id",
           "slot_definition.variant.id",
           "slot_definition.variant.service.id",
+          "reservations.user.id",
+          "reservations.slot.date",
+          "reservations.slot.time_start",
+          "reservations.slot.time_end",
+          "reservations.slot.slot_definition.id",
+          "reservations.slot.slot_definition.variant.id",
+          "reservations.slot.slot_definition.variant.service.id",
         ],
         filter: reservedSlotsFilter.value,
       }),
@@ -286,6 +295,13 @@
           "slot_definition.id",
           "slot_definition.variant.id",
           "slot_definition.variant.service.id",
+          "reservations.user.id",
+          "reservations.slot.date",
+          "reservations.slot.time_start",
+          "reservations.slot.time_end",
+          "reservations.slot.slot_definition.id",
+          "reservations.slot.slot_definition.variant.id",
+          "reservations.slot.slot_definition.variant.service.id",
         ],
       },
     });
@@ -405,6 +421,7 @@
           timeToDate(dayDefinition.time_end),
           timeToDate(slotDefinition.time_end),
         ]),
+        dayDefinition,
         slotDefinition,
         reservedSlots.value ?? []
       );

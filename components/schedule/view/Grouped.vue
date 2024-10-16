@@ -54,7 +54,6 @@
               v-for="(slot, i) in timetable.slots"
               :key="`${timetable.title}-${slot.time_start}-${slot.time_end}`"
               :slot="slot"
-              status="available"
               :title="timetable.service?.title"
               :height="
                 getSlotHeightAcrossTimetables(

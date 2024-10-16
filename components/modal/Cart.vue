@@ -36,12 +36,15 @@
             </NuxtLink>
           </div>
 
-          <CartItems
+          <div>
+            {{ cartStore.slots }}
+          </div>
+          <!-- <CartItems
             v-else
             :slots="cartStore.slots"
             :removable="true"
             @remove="onSlotRemove"
-          ></CartItems>
+          ></CartItems> -->
           <hr class="border-primary border-2 rounded-full mt-auto" />
 
           <div class="flex justify-between text-secondary">
@@ -149,16 +152,16 @@
 
   const getTotalAmount = () => {
     const total = cartStore.slots.reduce((sum, slot) => {
-      return sum + parseFloat(slot.slot_definition.price.toString());
+      return sum + slot.slot_definition.price;
     }, 0);
 
     return total;
   };
 
-  const onSlotRemove = (slot: ApiSlot) => {
-    const index = cartStore.slots.findIndex((s) => s.id == slot.id);
-    if (index >= 0) cartStore.slots.splice(index, 1);
-  };
+  // const onSlotRemove = (slot: ApiSlot) => {
+  //   const index = cartStore.slots.findIndex((s) => s.id == slot.id);
+  //   if (index >= 0) cartStore.slots.splice(index, 1);
+  // };
 
   const usePlan = ref(true);
   const selectedPlan = ref<ApiPlanUser | null>(null);

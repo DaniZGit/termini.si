@@ -63,6 +63,10 @@
       <div v-html="institution?.content" class="text-neutral-darkGray"></div>
     </div>
 
+    <div>
+      {{ reservedSlots }}
+    </div>
+
     <!-- schedule -->
     <div
       v-if="institution && institutionStatus != 'pending'"
@@ -285,10 +289,18 @@
     // realtime data - maybe can move this outside the onmounted hook - https://github.com/Intevel/nuxt-directus/issues/264
     const client = useDirectusRealtime();
     await client.connect();
+
+    // on slot create
+    listenToSlotCreateEvent(client);
+    listenToSlotDeleteEvent(client);
+  });
+
+  const listenToSlotCreateEvent = async (client: any) => {
     const { subscription } = await client.subscribe("slots", {
       event: "create",
       query: {
         fields: [
+          "id",
           "date",
           "time_start",
           "time_end",
@@ -316,7 +328,31 @@
       // re-generate timetables
       generateTimetables();
     }
-  });
+  };
+
+  const listenToSlotDeleteEvent = async (client: any) => {
+    const { subscription } = await client.subscribe("slots", {
+      event: "delete",
+    });
+    for await (const item of subscription) {
+      console.log("slot delete", item);
+      if (!item.data || !timetables.value) continue;
+      const deletedSlotIds = item.data as string[];
+
+      // remove slots from the array of existing reserved slots
+      deletedSlotIds.forEach((deletedSlotId) => {
+        const index = reservedSlots.value?.findIndex(
+          (reservedSlot) => reservedSlot.id == deletedSlotId
+        );
+        if (index != undefined && index >= 0) {
+          reservedSlots.value?.splice(index, 1);
+        }
+      });
+
+      // re-generate timetables
+      generateTimetables();
+    }
+  };
 
   const timetables = ref<Timetable[]>([]);
   const generateTimetables = () => {

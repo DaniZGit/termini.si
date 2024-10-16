@@ -27,6 +27,7 @@ export type ApiDayDefinition = {
 };
 
 export type ApiSlot = {
+  id: string;
   date: string;
   time_start: string;
   time_end: string;

@@ -16,6 +16,7 @@ export type Timetable = {
 };
 
 export type TimetableSlot = {
+  id?: string;
   date: string;
   time_start: string;
   time_end: string;

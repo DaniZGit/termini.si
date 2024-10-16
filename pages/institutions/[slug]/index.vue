@@ -63,10 +63,6 @@
       <div v-html="institution?.content" class="text-neutral-darkGray"></div>
     </div>
 
-    <div>
-      {{ reservedSlots }}
-    </div>
-
     <!-- schedule -->
     <div
       v-if="institution && institutionStatus != 'pending'"
@@ -261,10 +257,12 @@
       // @ts-ignore
       readItems("slots", {
         fields: [
+          "id",
           "date",
           "time_start",
           "time_end",
           "slot_definition.id",
+          "slot_definition.price",
           "slot_definition.variant.id",
           "slot_definition.variant.service.id",
           "reservations.user.id",
@@ -305,6 +303,7 @@
           "time_start",
           "time_end",
           "slot_definition.id",
+          "slot_definition.price",
           "slot_definition.variant.id",
           "slot_definition.variant.service.id",
           "reservations.user.id",

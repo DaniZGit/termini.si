@@ -3,6 +3,7 @@
     <Multiselect
       ref="multiSelectEl"
       v-model="value"
+      :disabled="disabled"
       :options="options"
       :track-by="trackBy"
       :label="label"
@@ -39,6 +40,10 @@
   );
 
   const props = defineProps({
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     options: null,
     trackBy: String,
     label: String,

@@ -6,27 +6,29 @@
       class="flex flex-col pb-2"
     >
       <div class="flex gap-x-2">
-        <h2 class="text-lg font-semibold">
-          {{ getDateNice(date as string) }}
+        <h2 class="text-lg font-semibold capitalize">
+          {{ format(date, "dd. MM. yyyy (EEEE)", { locale: sl }) }}
         </h2>
       </div>
-      <div v-for="(groupedSlots, title) in groupedByDateSlots">
-        <h4 class="font-medium">{{ title }}</h4>
+      <div v-for="(group, groupKey) in groupedByDateSlots">
+        <h4 class="font-medium">
+          {{ group.service.title }} ({{ group.variant.title }})
+        </h4>
         <div
-          v-for="slot in groupedSlots"
+          v-for="slot in group.slots"
           :key="slot.id"
           class="flex justify-between pl-2"
         >
           <div class="flex items-center gap-x-1">
             <span>
-              {{ slot.start_time.substring(0, 5) }}
+              {{ slot.time_start.substring(0, 5) }}
               -
-              {{ slot.end_time.substring(0, 5) }}
+              {{ slot.time_end.substring(0, 5) }}
             </span>
           </div>
           <div class="flex items-center gap-x-1">
             <span>
-              {{ getPriceNice(slot.price.toString()) }}
+              {{ getPriceNice(slot.slot_definition.price.toString()) }}
             </span>
             <Icon
               v-if="removable"
@@ -44,10 +46,13 @@
 </template>
 
 <script lang="ts" setup>
-  import type { ApiSlot } from "~/types/schedule";
+  import { format } from "date-fns";
+  import { sl } from "date-fns/locale";
+  import type { TimetableSlot } from "~/types/misc";
+  import type { ApiService, ApiVariant } from "~/types/service";
 
   const props = defineProps({
-    slots: Array as PropType<ApiSlot[]>,
+    slots: Array as PropType<TimetableSlot[]>,
     removable: {
       type: Boolean,
       default: false,
@@ -55,24 +60,45 @@
   });
 
   const emit = defineEmits<{
-    remove: [slot: ApiSlot];
+    remove: [slot: TimetableSlot];
   }>();
 
   const getGroupedSlots = () => {
     if (!props.slots) return {};
 
-    let groupedSlots: Record<string, Record<string, ApiSlot[]>> = {};
+    let groupedSlots: Record<
+      string,
+      Record<
+        string,
+        {
+          service: ApiService;
+          variant: ApiVariant;
+          slots: TimetableSlot[];
+        }
+      >
+    > = {};
 
     props.slots.forEach((slot) => {
-      if (groupedSlots[slot.date.date]) {
-        if (groupedSlots[slot.date.date][slot.date.schedule.title]) {
-          groupedSlots[slot.date.date][slot.date.schedule.title].push(slot);
+      const date = slot.date;
+      const groupKey = `${slot.slot_definition.variant.service.id}_${slot.slot_definition.variant.id}`;
+
+      if (groupedSlots[date]) {
+        if (groupedSlots[date][groupKey]) {
+          groupedSlots[date][groupKey].slots.push(slot);
         } else {
-          groupedSlots[slot.date.date][slot.date.schedule.title] = [slot];
+          groupedSlots[date][groupKey] = {
+            service: slot.slot_definition.variant.service,
+            variant: slot.slot_definition.variant,
+            slots: [slot],
+          };
         }
       } else {
-        groupedSlots[slot.date.date] = {};
-        groupedSlots[slot.date.date][slot.date.schedule.title] = [slot];
+        groupedSlots[date] = {};
+        groupedSlots[date][groupKey] = {
+          service: slot.slot_definition.variant.service,
+          variant: slot.slot_definition.variant,
+          slots: [slot],
+        };
       }
     });
 
@@ -85,19 +111,21 @@
     );
 
     Object.keys(sorted).forEach((key) => {
-      Object.keys(sorted[key]).forEach((schedule) => {
-        sorted[key][schedule] = sorted[key][schedule].sort((a, b) => {
-          if (a.start_time < b.end_time) return -1;
-          else if (a.start_time > b.start_time) return 1;
-          return 0;
-        });
+      Object.keys(sorted[key]).forEach((groupKey) => {
+        sorted[key][groupKey].slots = sorted[key][groupKey].slots.sort(
+          (a, b) => {
+            if (a.time_start < b.time_start) return -1;
+            else if (a.time_start > b.time_start) return 1;
+            return 0;
+          }
+        );
       });
     });
 
     return sorted;
   };
 
-  const onRemove = (slot: ApiSlot) => {
+  const onRemove = (slot: TimetableSlot) => {
     emit("remove", slot);
   };
 </script>

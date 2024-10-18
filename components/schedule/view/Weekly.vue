@@ -49,6 +49,7 @@
           </div>
           <ClientOnly>
             <UiMultiSelect
+              :disabled="cartStore.addToCartStatus == 'pending'"
               :options="timetable.service?.variants"
               track-by="id"
               label="title"
@@ -89,6 +90,8 @@
   import { sl } from "date-fns/locale";
   import type { Timetable, TimetableSlot } from "~/types/misc";
   import type { ApiVariant } from "~/types/service";
+
+  const cartStore = useCartStore();
 
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,

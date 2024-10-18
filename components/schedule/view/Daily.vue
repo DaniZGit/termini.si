@@ -48,6 +48,7 @@
                 timetable.service?.variants &&
                 timetable.service?.variants.length > 1
               "
+              :disabled="cartStore.addToCartStatus == 'pending'"
               :options="timetable.service?.variants"
               track-by="id"
               label="title"
@@ -86,6 +87,8 @@
 <script lang="ts" setup>
   import type { Timetable, TimetableSlot } from "~/types/misc";
   import type { ApiVariant } from "~/types/service";
+
+  const cartStore = useCartStore();
 
   const timetables = defineModel("timetables", {
     type: Array as PropType<Array<Timetable>>,

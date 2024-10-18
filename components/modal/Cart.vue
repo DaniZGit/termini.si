@@ -35,16 +35,12 @@
               iskalnika.
             </NuxtLink>
           </div>
-
-          <div>
-            {{ cartStore.slots }}
-          </div>
-          <!-- <CartItems
+          <CartItems
             v-else
             :slots="cartStore.slots"
             :removable="true"
             @remove="onSlotRemove"
-          ></CartItems> -->
+          ></CartItems>
           <hr class="border-primary border-2 rounded-full mt-auto" />
 
           <div class="flex justify-between text-secondary">
@@ -133,8 +129,8 @@
 <script lang="ts" setup>
   import { useCartStore } from "~/stores/cart";
   import type { ApiError } from "~/types/error";
+  import type { TimetableSlot } from "~/types/misc";
   import type { ApiPlanUser } from "~/types/plan";
-  import type { ApiSlot } from "~/types/schedule";
 
   const { user } = useDirectusUsers();
   const stateStore = useStateStore();
@@ -158,25 +154,20 @@
     return total;
   };
 
-  // const onSlotRemove = (slot: ApiSlot) => {
-  //   const index = cartStore.slots.findIndex((s) => s.id == slot.id);
-  //   if (index >= 0) cartStore.slots.splice(index, 1);
-  // };
+  const onSlotRemove = (slot: TimetableSlot) => {
+    const index = cartStore.slots.findIndex((s) => s.id == slot.id);
+    if (index != undefined && index >= 0) cartStore.slots.splice(index, 1);
+  };
 
   const usePlan = ref(true);
   const selectedPlan = ref<ApiPlanUser | null>(null);
   const getUserPlans = () => {
     const slug = route.params.slug;
-    const type = route.params.type;
 
     return user.value?.plans.filter((plan: ApiPlanUser) => {
       if (typeof plan.plans_id !== "object") return false;
 
-      return (
-        plan.plans_id &&
-        plan.plans_id.service?.institution.slug === slug &&
-        plan.plans_id.service.type === type
-      );
+      return plan.plans_id && plan.plans_id.service?.institution.slug === slug;
     });
   };
 
@@ -210,24 +201,22 @@
   const reservationStatus = ref<"idle" | "pending" | "success">("idle");
   const onReservation = async () => {
     reservationStatus.value = "pending";
-    let body = {};
-    if (usePlan.value && typeof selectedPlan.value?.plans_id === "object")
-      body = {
-        plan_id: selectedPlan.value.plans_id.id,
-      };
+    let planID = null;
+    if (usePlan.value && typeof selectedPlan.value?.plans_id === "object") {
+      planID = selectedPlan.value.plans_id.id;
+    }
 
     try {
-      await cartStore.reserveTimeSlots(body);
+      await cartStore.reserveSlots(planID);
       reservationStatus.value = "success";
-      cartStore.slots = [];
     } catch (_error: any) {
       const error: ApiError = _error;
-      if (error.type == "cart_reservation_slot_change") {
+      if (error.type == "cart_change") {
         console.log(
           "Time slot has been reerved in the mean time, recheck with user if hes sure to complete reservation"
         );
       } else {
-        console.log("Some other error");
+        console.log("Some other error", error);
       }
 
       reservationStatus.value = "idle";

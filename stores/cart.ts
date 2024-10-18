@@ -1,3 +1,4 @@
+import { Body } from "#build/components";
 import { defineStore } from "pinia";
 import type { TimetableSlot } from "~/types/misc";
 
@@ -50,13 +51,7 @@ export const useCartStore = defineStore("cart", () => {
   const addToCart = async () => {
     await execAddToCart();
 
-    // let removedSlots: TimetableSlot[] = [];
     if (!addToCartError.value && addToCartData.value) {
-      // const newSlotIds = addToCartData.value.slots.map((slot) => slot.id);
-      // removedSlots = slots.value.filter(
-      //   (slot) => !newSlotIds?.includes(slot.id)
-      // );
-
       slots.value = addToCartData.value?.slots;
       ogSlots.value = useCloned(slots).cloned.value;
     } else {
@@ -67,65 +62,54 @@ export const useCartStore = defineStore("cart", () => {
       slots.value = useCloned(ogSlots).cloned.value;
     }
 
-    // return Promise.resolve(removedSlots);
-    return Promise.resolve([]);
+    return Promise.resolve();
   };
 
   // slot reservation functionality
-  // const {
-  //   data: addToCartData,
-  //   error: addToCartError,
-  //   refresh: execAddToCart,
-  //   status: addToCartStatus,
-  // } = useFetch<{
-  //   slots: ApiSlot[];
-  // }>(`/reservation`, {
-  //   baseURL: useRuntimeConfig().public.directus.url,
-  //   method: "PATCH",
-  //   headers: {
-  //     Authorization: `Bearer ${useDirectusUsers().tokens.value?.access_token}`,
-  //   },
-  //   body: {
-  //     slots: slotIds,
-  //   },
-  //   immediate: true,
-  //   watch: false,
-  // });
+  const checkoutBody = ref({ plan_id: null });
+  const {
+    data: checkoutData,
+    error: checkoutError,
+    execute: checkoutCart,
+    status: checkoutStatus,
+  } = useFetch(`/checkout`, {
+    baseURL: useRuntimeConfig().public.directus.url,
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${useDirectusUsers().tokens.value?.access_token}`,
+    },
+    body: checkoutBody.value,
+    immediate: false,
+    watch: false,
+  });
 
-  const reserveTimeSlots = async (body = {}) => {
+  const reserveSlots = async (planID: any) => {
     // first validate cart slots
-    const removedSlots = await addToCart();
-
-    if (removedSlots.length)
+    await addToCart();
+    console.log("vaslidated cart", slots.value);
+    if (!slots.value.length) {
       return Promise.reject({
-        type: "cart_reservation_slot_change",
-        data: removedSlots,
+        type: "cart_change",
       });
+    }
 
-    try {
-      const data = await $fetch(`/reservations`, {
-        baseURL: useRuntimeConfig().public.directus.url,
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${
-            useDirectusUsers().tokens.value?.access_token
-          }`,
-        },
-        body: body,
-      });
+    // all good, we can checkout the slots
+    checkoutBody.value.plan_id = planID;
+    await checkoutCart();
 
-      // update user tokens
-      const { readMe } = useDirectusUsers();
-      readMe();
-    } catch (error) {
+    if (checkoutError.value) {
+      // something went wrong
       return Promise.reject({
         type: "other",
         data: null,
       });
     }
-  };
 
-  const {} = useFetch;
+    // update user data/plans/tokens
+    useDirectusUsers().readMe();
+    slots.value = [];
+    return Promise.resolve();
+  };
 
   return {
     slots,
@@ -134,6 +118,6 @@ export const useCartStore = defineStore("cart", () => {
     cartReservationID,
     addToCart,
     addToCartStatus,
-    reserveTimeSlots,
+    reserveSlots,
   };
 });

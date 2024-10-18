@@ -209,6 +209,11 @@
     try {
       await cartStore.reserveSlots(planID);
       reservationStatus.value = "success";
+
+      // hide modal
+      setTimeout(() => {
+        visible.value = false;
+      }, 1500);
     } catch (_error: any) {
       const error: ApiError = _error;
       if (error.type == "cart_change") {

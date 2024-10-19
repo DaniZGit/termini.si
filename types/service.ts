@@ -21,7 +21,7 @@ export type ApiService = {
 export type ApiVariant = {
   id: number;
   title: string;
-  service: ApiService;
+  service?: ApiService;
   slot_definitions: ApiSlotDefinition[] | null;
 };
 
@@ -33,5 +33,5 @@ export type ApiSlotDefinition = {
   capacity: number;
   duration: number;
   price: number;
-  variant: ApiVariant;
+  variant?: ApiVariant;
 };

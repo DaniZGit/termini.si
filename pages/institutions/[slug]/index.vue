@@ -512,9 +512,9 @@
     // remove previous selected slots from the cart (based on variant)
     const updatedSlots = cartStore.slots.filter(
       (slot) =>
-        slot.slot_definition.variant.service.id !=
+        slot.slot_definition.variant?.service?.id !=
           selectedServiceVariants.value[timetableId].serviceId ||
-        slot.slot_definition.variant.id !=
+        slot.slot_definition.variant?.id !=
           selectedServiceVariants.value[timetableId].variantId ||
         !doDatesMatch(
           slot.date,

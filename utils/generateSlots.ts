@@ -40,8 +40,8 @@ export default (
               (reservation.status == "held" ||
                 reservation.status == "confirmed")
           ) &&
-          reservedSlot.slot_definition.variant.service.id ==
-            slotDefinition.variant.service.id &&
+          reservedSlot.slot_definition.variant?.service?.id ==
+            slotDefinition.variant?.service?.id &&
           doDatesMatch(date, reservedSlot.date) &&
           doSlotsIntersect(
             { time_start: currTimeString, time_end: nextSlotTimeString },

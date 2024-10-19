@@ -3,6 +3,7 @@ import type { ApiImage } from "./image";
 import type { ApiService } from "./service";
 
 export type ApiInstitutionDisplayType = "daily" | "weekly" | "grouped";
+export type ApiInstitutionPaymentOptions = string[];
 
 export type ApiInstitution = {
   id: string;
@@ -16,6 +17,7 @@ export type ApiInstitution = {
   phone: string;
   website: string;
   display_type: ApiInstitutionDisplayType;
+  payment_options: ApiInstitutionPaymentOptions;
   thumbnail: ApiImage | null;
   images: {
     directus_files_id: ApiImage;

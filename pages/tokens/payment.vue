@@ -144,7 +144,7 @@
     client_secret: string;
     tokens: number;
     amount: number;
-  }>(`/stripe-payment-intent`, {
+  }>(`/payment-intent`, {
     baseURL: config.public.directus.url,
     headers: {
       Authorization: `Bearer ${useDirectusUsers().tokens.value?.access_token}`,
@@ -160,8 +160,8 @@
     "loading-stripe"
   );
   onNuxtReady(async () => {
-    let tokens = parseFloat(route.query.amount) || 0;
-    if (tokens < 0 || tokens > 500) {
+    let tokens = parseFloat(route.query.amount as string) || 0;
+    if (tokens < 0) {
       status.value = "error";
       return;
     }
@@ -219,7 +219,7 @@
   const getButtonText = () => {
     if (status.value == "loading-stripe") return "Nalaganje plačilnega sistema";
 
-    const tokens = parseFloat(route.query.amount) || 0;
+    const tokens = parseFloat(route.query.amount as string) || 0;
     return `Plačaj ${tokens.toFixed(2)} €`;
   };
 </script>

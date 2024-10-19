@@ -65,7 +65,7 @@
 
   const route = useRoute();
   onMounted(() => {
-    const queryTokens = parseFloat(route.query.amount) || 0;
+    const queryTokens = parseFloat(route.query.amount as string) || 0;
     tokens.value = queryTokens;
   });
 </script>

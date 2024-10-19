@@ -50,7 +50,12 @@
             </span>
           </div>
 
-          <div v-if="getUserPlans().length">
+          <div
+            v-if="
+              institution?.payment_options.includes('plans') &&
+              getUserPlans().length
+            "
+          >
             <div class="flex flex-wrap justify-between items-center gap-y-1">
               <div>
                 <UiFormCheckbox
@@ -86,29 +91,29 @@
             </div>
             <div v-else class="text-left text-neutral-red text-sm pt-1">
               <span>
-                Ker ne uporabljate paketa, se upoštevajo pravila
-                <span class="underline underline-offset-2">
-                  privzetega paketa
-                </span>
-                inštitucije za rezervacijo terminov in se v tem primeru
-                odštejejo žetoni.
+                Rezervacija se plačuje v žetonih, več o tem si lahko preberete
+                <NuxtLink class="link">tukaj.</NuxtLink>
               </span>
+            </div>
+          </div>
+          <div v-else>
+            <div class="flex flex-wrap justify-between items-center gap-y-1">
+              <div class="text-left text-neutral-red text-sm pt-1">
+                <span>
+                  Rezervacija se plačuje v žetonih, več o tem si lahko preberete
+                  <NuxtLink class="link">tukaj.</NuxtLink>
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         <UiButton
-          class="w-full h-full flex items-center justify-center gap-x-2 self-end"
+          class="row-span-1 w-full h-full flex items-center justify-center gap-x-2 self-end"
           :disabled="!canReserve"
           @click="onReservation"
         >
-          <span class="uppercase">{{
-            reservationStatus == "idle"
-              ? "Rezerviraj"
-              : reservationStatus == "pending"
-              ? "V teku rezerviranja"
-              : "Rezervirano"
-          }}</span>
+          <span class="uppercase">{{ getButtonText() }}</span>
           <Icon
             :name="
               reservationStatus == 'idle'
@@ -129,6 +134,7 @@
 <script lang="ts" setup>
   import { useCartStore } from "~/stores/cart";
   import type { ApiError } from "~/types/error";
+  import type { ApiInstitution } from "~/types/institution";
   import type { TimetableSlot } from "~/types/misc";
   import type { ApiPlanUser } from "~/types/plan";
 
@@ -141,6 +147,10 @@
   const visible = defineModel("visible", {
     default: false,
   });
+
+  const { institution } = defineProps<{
+    institution: ApiInstitution | null;
+  }>();
 
   onClickOutside(modal, () => {
     visible.value = false;
@@ -171,29 +181,53 @@
     });
   };
 
+  const getButtonText = () => {
+    if (reservationStatus.value == "pending") return "V teku rezervacije";
+    else if (reservationStatus.value == "success") return "Rezervirano";
+
+    if (usePlan.value) {
+      if (
+        selectedPlan.value?.total_reservations &&
+        selectedPlan.value?.total_reservations <= 0
+      )
+        return "Ni dovolj rezervacij";
+    } else {
+      if (user.value?.tokens < getTotalAmount()) return "Ni dovolj žetonov";
+    }
+
+    return "Rezerviraj";
+  };
+
   watch(visible, () => {
     const userPlans = getUserPlans();
 
-    if (userPlans.length) {
-      if (selectedPlan.value !== userPlans.at(0)) {
-        selectedPlan.value = userPlans.at(0);
-      }
+    if (institution?.payment_options.includes("plans")) {
+      if (userPlans.length) {
+        if (selectedPlan.value !== userPlans.at(0)) {
+          selectedPlan.value = userPlans.at(0);
+        }
 
-      usePlan.value = true;
+        usePlan.value = true;
+      }
+    } else {
+      usePlan.value = false;
     }
   });
 
   const canReserve = computed(() => {
     if (reservationStatus.value !== "idle") return false;
     if (!user.value) return false;
-    if (!usePlan.value && user.value.tokens < getTotalAmount()) return false;
-    if (
-      usePlan &&
-      (!getUserPlans().length ||
+
+    if (usePlan.value) {
+      if (
+        !getUserPlans().length ||
         !selectedPlan.value ||
-        selectedPlan.value.total_reservations < cartStore.slots.length)
-    )
-      return false;
+        selectedPlan.value.total_reservations < cartStore.slots.length
+      )
+        return false;
+    } else {
+      if (user.value.tokens < getTotalAmount()) return false;
+    }
 
     return true;
   });

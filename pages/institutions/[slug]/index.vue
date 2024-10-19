@@ -6,6 +6,7 @@
       </h1>
     </div>
 
+    <!-- Institution images -->
     <div v-if="institution?.images.length">
       <ClientOnly>
         <swiper-container pagination="true">
@@ -21,6 +22,7 @@
       </ClientOnly>
     </div>
 
+    <!-- Institution info -->
     <div class="px-4 py-4 flex flex-col gap-y-2">
       <div v-if="institution?.address" class="flex gap-x-2">
         <Icon
@@ -59,6 +61,7 @@
       </div>
     </div>
 
+    <!-- Institution description -->
     <div v-if="institution?.content" class="px-4 py-4">
       <div v-html="institution?.content" class="text-neutral-darkGray"></div>
     </div>
@@ -86,6 +89,43 @@
         ></Schedule>
       </div>
     </div>
+
+    <!-- Cart -->
+    <div
+      v-show="cartStore.slots.length || cartStore.ogSlots.length"
+      class="fixed bottom-0 left-0 right-0 flex justify-center"
+    >
+      <UiShadowPanel
+        class="relative inline-flex justify-center items-center gap-x-2 text-secondary z-30 py-2"
+      >
+        <UiButton
+          class="py-1 px-2 relative"
+          :disabled="!canOpenCartModal"
+          @click="showCartModal = true"
+        >
+          <Icon
+            :name="
+              canOpenCartModal
+                ? 'i-ic:baseline-calendar-month'
+                : 'i-svg-spinners-bars-rotate-fade'
+            "
+            size="22"
+            class="text-neutral-white"
+          />
+          <span
+            class="absolute -top-2.5 -right-2.5 flex justify-center items-center aspect-square h-7 w-auto text-sm text-neutral-white bg-secondary rounded-full"
+          >
+            {{ cartStore.slots.length }}
+          </span>
+        </UiButton>
+      </UiShadowPanel>
+    </div>
+
+    <!-- Cart Modal -->
+    <ModalCart
+      v-model:visible="showCartModal"
+      :institution="institution"
+    ></ModalCart>
   </div>
 </template>
 
@@ -137,6 +177,7 @@
           "phone",
           "website",
           "display_type",
+          "payment_options",
           "images.directus_files_id.*",
         ],
         filter: {
@@ -488,6 +529,13 @@
     // re-generate timetables
     generateTimetables();
   };
+
+  const showCartModal = ref(false);
+  const canOpenCartModal = computed(
+    () =>
+      cartStore.addToCartStatus != "pending" &&
+      cartStore.slots.length == cartStore.ogSlots.length
+  );
 </script>
 
 <style></style>

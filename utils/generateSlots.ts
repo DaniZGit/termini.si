@@ -66,26 +66,22 @@ export default (
         canReserve = false;
       }
 
-      // if slot time is reserved, check if intersecting slots are from the same variant
-      // const sameVariantIntersectingSlots = intersectingSlots.filter(
-      //   (intersectingSlot) =>
-      //     intersectingSlot.slot_definition.variant.id ==
-      //     slotDefinition.variant.id
-      // );
-      // if (canReserve || (!canReserve && sameVariantIntersectingSlots.length)) {
+      // did user reserve this slot
+      const isReservedByActiveUser = intersectingSlots.some(
+        (intersectingSlot) =>
+          intersectingSlot.reservations.some(
+            (reservation) => reservation.user.id == user.value?.id
+          )
+      );
+
       slots.push({
         date: format(date, "yyyy-MM-dd"),
         time_start: currTimeString,
         time_end: nextSlotTimeString,
         slot_definition: slotDefinition,
-        is_reserved: !canReserve,
-        is_reserved_by_active_user: intersectingSlots.some((intersectingSlot) =>
-          intersectingSlot.reservations.some(
-            (reservation) => reservation.user.id == user.value?.id
-          )
-        ),
+        is_reserved: !canReserve || isReservedByActiveUser,
+        is_reserved_by_active_user: isReservedByActiveUser,
       });
-      // }
     }
     currentTime = nextSlot;
   }

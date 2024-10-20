@@ -169,7 +169,7 @@
     if (index != undefined && index >= 0) cartStore.slots.splice(index, 1);
   };
 
-  const usePlan = ref(true);
+  const usePlan = ref(false);
   const selectedPlan = ref<ApiPlanUser | null>(null);
   const getUserPlans = () => {
     const slug = route.params.slug;
@@ -200,8 +200,10 @@
 
   watch(visible, () => {
     const userPlans = getUserPlans();
+    console.log("visible cahnges");
 
     if (institution?.payment_options.includes("plans")) {
+      console.log("institution uses plans");
       if (userPlans.length) {
         if (selectedPlan.value !== userPlans.at(0)) {
           selectedPlan.value = userPlans.at(0);

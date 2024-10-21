@@ -29,7 +29,7 @@
   }
 
   .link {
-    @apply text-accent-lightBlue hover:text-secondary font-semibold underline underline-offset-2;
+    @apply text-secondary hover:text-accent-lightBlue font-semibold underline underline-offset-2;
   }
 
   .header-link {

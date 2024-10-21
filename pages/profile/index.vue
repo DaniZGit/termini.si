@@ -12,11 +12,17 @@
           class="flex flex-col gap-y-4 border-2 border-primary rounded-full px-8 py-2"
         >
           <div class="flex justify-between items-center gap-x-2">
-            <Icon
-              name="i-ic:baseline-person-outline"
-              size="64"
-              class="text-secondary -ml-2"
-            />
+            <div class="relative">
+              <Icon
+                name="i-ic:baseline-person-outline"
+                size="64"
+                class="text-secondary -ml-2"
+              />
+              <Icon
+                name="i-mdi:square-edit-outline"
+                class="absolute top-2 right-0 text-secondary"
+              />
+            </div>
             <div>
               <div class="flex justify-end items-center gap-x-1 font-bold">
                 <span> {{ user?.first_name }} {{ user?.last_name }} </span>
@@ -53,21 +59,29 @@
 
         <div>
           <h2 class="text-2xl font-bold">Rezervacije</h2>
-          <div v-if="reservations?.length" class="flex flex-col">
-            <NuxtLink
-              :to="`/profile/reservations/${reservation.id}`"
-              v-for="reservation in reservations"
-              :key="reservation.id"
+          <div class="relative">
+            <div v-if="reservations?.length" class="flex flex-col">
+              <NuxtLink
+                :to="`/profile/reservations/${reservation.id}`"
+                v-for="reservation in reservations"
+                :key="reservation.id"
+              >
+                <ItemReservation :reservation="reservation"></ItemReservation>
+                <hr class="border-[1px] border-primary rounded-full my-1" />
+              </NuxtLink>
+            </div>
+            <div v-else>
+              <h3 class="text-xl text-center py-4">Trenutno ni rezervacij</h3>
+            </div>
+            <div
+              v-if="fetchingReservations == 'pending'"
+              :class="{
+                'absolute top-0 -left-2 -right-2 bottom-0 flex justify-center items-center bg-secondary bg-opacity-20 py-4':
+                  reservations?.length,
+              }"
             >
-              <ItemReservation :reservation="reservation"></ItemReservation>
-              <hr class="border-[1px] border-primary rounded-full my-1" />
-            </NuxtLink>
-          </div>
-          <div v-else-if="fetchingReservations == 'pending'" class="py-4">
-            <UiLoader></UiLoader>
-          </div>
-          <div v-else>
-            <h3 class="text-xl text-center py-4">Trenutno ni rezervacij</h3>
+              <UiLoader></UiLoader>
+            </div>
           </div>
 
           <UiPagination
@@ -79,21 +93,31 @@
 
         <div>
           <h2 class="text-2xl font-bold">Transakcije</h2>
-          <div v-if="transactions?.length" class="flex flex-col gap-y-2">
-            <NuxtLink
-              :to="`/profile/transactions/${transaction.id}`"
-              v-for="transaction in transactions"
-              :key="transaction.id"
+
+          <div class="relative">
+            <div v-if="transactions?.length" class="flex flex-col gap-y-2">
+              <NuxtLink
+                :to="`/profile/transactions/${transaction.id}`"
+                v-for="transaction in transactions"
+                :key="transaction.id"
+              >
+                <ItemTransaction :transaction="transaction"></ItemTransaction>
+                <hr class="border-[1px] border-primary rounded-full my-1" />
+              </NuxtLink>
+            </div>
+            <div v-else>
+              <h3 class="text-xl text-center py-4">Trenutno ni transakcij</h3>
+            </div>
+
+            <div
+              v-if="fetchingTransactions == 'pending'"
+              :class="{
+                'absolute top-0 -left-2 -right-2 bottom-0 flex justify-center items-center bg-secondary bg-opacity-20 py-4':
+                  reservations?.length,
+              }"
             >
-              <ItemTransaction :transaction="transaction"></ItemTransaction>
-              <hr class="border-[1px] border-primary rounded-full my-1" />
-            </NuxtLink>
-          </div>
-          <div v-else-if="fetchingTransactions == 'pending'" class="py-4">
-            <UiLoader></UiLoader>
-          </div>
-          <div v-else>
-            <h3 class="text-xl text-center py-4">Trenutno ni transakcij</h3>
+              <UiLoader></UiLoader>
+            </div>
           </div>
 
           <UiPagination
@@ -108,7 +132,7 @@
 </template>
 
 <script lang="ts" setup>
-  import type { ApiTimeSlot } from "~/types/court";
+  import type { ApiReservation } from "~/types/reservation";
   import type { ApiTransaction } from "~/types/transaction";
 
   const { user } = useDirectusAuth();
@@ -120,45 +144,34 @@
     data: reservations,
     error: reservationError,
     status: fetchingReservations,
-  } = await useLazyAsyncData<ApiTimeSlot[]>(
+  } = await useLazyAsyncData<ApiReservation[]>(
     "reservations",
     () =>
-      readItems("time_slots", {
+      /* @ts-ignore */
+      readItems("reservations", {
+        fields: [
+          "*",
+          "slot.*",
+          "slot.slot_definition.variant.service.*",
+          "slot.slot_definition.variant.service.institution.*",
+        ],
         filter: {
           _and: [
             {
-              transactions: {
-                transactions_id: {
-                  user: {
-                    _eq: user.value?.id,
-                  },
+              user: {
+                id: {
+                  _eq: user.value?.id,
                 },
               },
             },
             {
-              transactions: {
-                transactions_id: {
-                  type: {
-                    _eq: "booking",
-                  },
-                },
+              status: {
+                _in: ["confirmed", "canceled"],
               },
             },
           ],
         },
-        fields: [
-          "id",
-          "start_time",
-          "end_time",
-          "schedule_day.date",
-          "schedule_day.court.institution.title",
-          "schedule_day.court.institution.city.title",
-          "schedule_day.court.institution.city.postal_code",
-          "schedule_day.court.institution.address",
-          "schedule_day.court.sport.title",
-          "schedule_day.court.sport.image",
-        ],
-        sort: ["-schedule_day.date", "start_time"],
+        sort: ["-date_updated", "-date_created"],
         limit: limit,
         page: reservationsPage.value,
         meta: "filter_count",
@@ -175,25 +188,20 @@
   } = await useLazyAsyncData<Array<{ count: number }>>(
     "totalReservationsCount",
     () =>
-      readSingleton("time_slots", {
+      readSingleton("reservations", {
         filter: {
+          /* @ts-ignore */
           _and: [
             {
-              transactions: {
-                transactions_id: {
-                  user: {
-                    _eq: user.value?.id,
-                  },
+              user: {
+                id: {
+                  _eq: user.value?.id,
                 },
               },
             },
             {
-              transactions: {
-                transactions_id: {
-                  type: {
-                    _eq: "booking",
-                  },
-                },
+              status: {
+                _in: ["confirmed", "canceled"],
               },
             },
           ],
@@ -212,6 +220,7 @@
   } = await useLazyAsyncData<ApiTransaction[]>(
     "transactionsCollection",
     () =>
+      /* @ts-ignore */
       readItems("transactions", {
         filter: {
           user: {

@@ -6,7 +6,14 @@
           <img src="/images/logo-side-spaceless.png" class="h-full" />
         </NuxtLink>
 
-        <div class="flex gap-x-1">
+        <div class="flex items-center gap-x-1">
+          <Icon
+            v-if="user"
+            name="i-ic:baseline-person-outline"
+            size="28"
+            class="text-primary"
+            @click="$router.push('/profile')"
+          />
           <Icon
             :name="menuIsOpened ? 'i-ic:round-close' : 'i-ic:round-menu'"
             size="32"

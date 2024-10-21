@@ -3,27 +3,30 @@
     <div class="flex flex-col">
       <div class="w-full flex justify-between items-center gap-x-2">
         <span class="text-secondary text-lg font-semibold">
-          {{ reservation?.schedule_day.court.institution.title }}
+          {{ reservation?.slot.slot_definition.variant?.service?.title }}
         </span>
-        <NuxtImg
-          :src="useAssetUrl(reservation?.schedule_day.court.sport?.image)"
-          class="h-6 w-auto aspect-square object-cover"
-          width="100"
-          height="100"
-        ></NuxtImg>
       </div>
       <div class="flex justify-between">
         <div class="flex flex-col">
           <span>
-            {{ reservation?.schedule_day.court.institution.address }},
-            {{ reservation?.schedule_day.court.institution.city?.postal_code }}
-            {{ reservation?.schedule_day.court.institution.city?.title }}</span
+            {{
+              reservation?.slot.slot_definition.variant?.service?.institution
+                .address
+            }},
+            {{
+              reservation?.slot.slot_definition.variant?.service?.institution
+                .city?.postal_code
+            }}
+            {{
+              reservation?.slot.slot_definition.variant?.service?.institution
+                .city?.title
+            }}</span
           >
           <span class="font-semibold"
-            >{{ getDateNice(reservation?.schedule_day.date) }} ({{
-              reservation?.start_time
+            >{{ getDateNice(reservation?.slot.date ?? "") }} ({{
+              reservation?.slot.time_start
             }}
-            - {{ reservation?.end_time }})</span
+            - {{ reservation?.slot.time_end }})</span
           >
         </div>
         <Icon
@@ -37,11 +40,11 @@
 </template>
 
 <script lang="ts" setup>
-  import type { ApiTimeSlot } from "~/types/court";
+  import type { ApiReservation } from "~/types/reservation";
 
   const props = defineProps({
     reservation: {
-      type: Object as PropType<ApiTimeSlot>,
+      type: Object as PropType<ApiReservation>,
     },
   });
 </script>

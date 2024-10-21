@@ -31,27 +31,9 @@
             Datum in čas transakcije
           </div>
           <div class="font-semibold">
-            {{ getDateNice(transaction?.date_created) }}
+            {{ getDateNice(transaction?.date_created ?? "") }}
             ob
-            {{ getTimeNice(transaction?.date_created) }}
-          </div>
-        </div>
-
-        <div v-if="transaction?.type == 'booking'">
-          <div class="text-secondary font-semibold text-xl">
-            Rezervirani termini
-          </div>
-          <div>
-            <div v-for="timeSlotId in transaction?.time_slots">
-              <NuxtLink
-                :to="`/profile/reservations/${timeSlotId.time_slots_id.id}`"
-              >
-                <ItemReservation
-                  :reservation="timeSlotId.time_slots_id"
-                ></ItemReservation>
-                <hr class="border-[1px] border-primary rounded-full my-1" />
-              </NuxtLink>
-            </div>
+            {{ getTimeNice(transaction?.date_created ?? "") }}
           </div>
         </div>
 
@@ -89,13 +71,13 @@
 
   const route = useRoute();
   const { readItem } = useDirectusItems();
-  const { user } = useDirectusAuth();
 
   const {
     data: transaction,
     error: transactionError,
     status: fetchingTransaction,
   } = await useLazyAsyncData<ApiTransaction>("transactionsCollection", () =>
+    /* @ts-ignore */
     readItem("transactions", route.params.transactionId, {
       fields: [
         "id",

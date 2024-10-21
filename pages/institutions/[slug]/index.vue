@@ -9,13 +9,15 @@
     <!-- Institution images -->
     <div v-if="institution?.images.length">
       <ClientOnly>
-        <swiper-container pagination="true">
+        <swiper-container
+          pagination="true"
+          :slides-per-view="width > 1000 ? 2 : 1"
+          :spaceBetween="30"
+        >
           <swiper-slide v-for="image in institution.images" :key="image"
             ><NuxtImg
               :src="useAssetUrl(image.directus_files_id.id)"
-              class="aspect-video w-full h-auto"
-              width="160"
-              height="90"
+              class="aspect-video w-full h-auto object-cover"
             ></NuxtImg
           ></swiper-slide>
         </swiper-container>
@@ -23,7 +25,7 @@
     </div>
 
     <!-- Institution info -->
-    <div class="px-4 py-4 flex flex-col gap-y-2">
+    <div class="px-4 py-4 flex flex-col md:flex-row gap-y-2 gap-x-6">
       <div v-if="institution?.address" class="flex gap-x-2">
         <Icon
           name="i-ic:round-location-on"
@@ -69,7 +71,7 @@
     <!-- schedule -->
     <div
       v-if="institution && institutionStatus != 'pending'"
-      class="m-4 flex flex-col gap-y-2 rounded-md"
+      class="p-4 flex flex-col gap-y-2 rounded-md"
     >
       <h2 class="text-2xl font-semibold text-secondary">Termini</h2>
       <div class="flex flex-col gap-y-4">
@@ -143,6 +145,7 @@
   const route = useRoute();
 
   const cartStore = useCartStore();
+  const { width, height } = useWindowSize();
 
   // datepicker stuff
   const selectedDate = ref<Date | [string, string]>(new Date());

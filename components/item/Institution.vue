@@ -10,8 +10,6 @@
     >
       <NuxtImg
         :src="useAssetUrl(institution?.thumbnail?.id)"
-        width="400"
-        height="150"
         class="aspect-video w-full h-auto object-cover transition-transform duration-300"
         :class="{ 'scale-125': focus }"
       ></NuxtImg>

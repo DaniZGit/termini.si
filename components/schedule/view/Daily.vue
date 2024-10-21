@@ -102,14 +102,19 @@
     slotUnselect: [slot: TimetableSlot];
   }>();
 
+  const { width, height } = useWindowSize();
   const headerColHeight = computed(() =>
     getHeaderColHeightAcrossTimetables(timetables.value)
   );
-  const slotCellColWidth = computed(() =>
-    getSlotCellColWidthAcrossTimetables(timetables.value)
+  const slotCellColWidth = computed(
+    () =>
+      getSlotCellColWidthAcrossTimetables(timetables.value) +
+      50 * (width.value / 1000)
   );
-  const slotCellRowHeight = computed(() =>
-    getSlotCellColHeightAcrossTimetables(timetables.value)
+  const slotCellRowHeight = computed(
+    () =>
+      getSlotCellColHeightAcrossTimetables(timetables.value) +
+      25 * (height.value / 1500)
   );
 </script>
 

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex justify-center items-center absolute top-0 left-0 right-0 border-2 border-neutral-white text-neutral-white"
+    class="flex justify-center items-center absolute top-0 left-0 right-0 border-2 border-neutral-white text-neutral-white hover:cursor-pointer hover:border-neutral-darkGray hover:z-50"
     :slot="slot?.is_reserved"
     :class="
       getSlotStatus == 'free'

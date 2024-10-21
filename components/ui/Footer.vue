@@ -1,6 +1,6 @@
 <template>
   <div
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 pt-8 px-8 border-t-2 border-neutral-gray text-center lg:text-left"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 pt-8 px-8 bg-neutral-white border-t-2 border-neutral-gray text-center lg:text-left"
   >
     <div>
       <h2 class="text-xl text-primary font-bold mb-2">Quick Links</h2>
@@ -55,8 +55,14 @@
         Get the termini.si app for easy booking on the go!
       </div>
       <div class="flex flex-col gap-y-2">
-        <UiButton>Download for Android</UiButton>
-        <UiButton>Download for iOS</UiButton>
+        <UiButton class="flex justify-center gap-x-2">
+          <span> Download for Android </span>
+          <Icon name="i-material-symbols-light:android" size="26"
+        /></UiButton>
+        <UiButton class="flex justify-center gap-x-2">
+          <span> Download for iOS </span>
+          <Icon name="i-ic:outline-apple" size="26" />
+        </UiButton>
       </div>
     </div>
 

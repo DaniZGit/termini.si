@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col gap-y-8 text-neutral-darkGray bg-neutral-white">
     <div
-      class="flex flex-col justify-center gap-y-8 px-4 h-dvh -mt-14 relative"
+      class="flex flex-col justify-center gap-y-8 px-4 h-dvh -mt-14 relative bg-[55%] lg:bg-[60%] bg-no-repeat"
+      style="
+        background-image: url('/images/homepage.png');
+        box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.5);
+      "
     >
       <div class="flex flex-col gap-y-4 text-center">
         <h1 class="text-primary text-4xl font-bold">
@@ -12,16 +16,24 @@
         </h4>
       </div>
 
-      <div class="flex flex-col justify-center items-center gap-y-4">
-        <UiButton class="w-full">Find an institution</UiButton>
-        <UiButton class="w-full">Browse Services</UiButton>
+      <div class="flex flex-col lg:flex-row justify-center items-center gap-4">
+        <UiButton
+          class="w-full lg:w-1/3 lg:py-8"
+          @click="$router.push('/institutions')"
+          >Find an institution</UiButton
+        >
+        <UiButton
+          class="w-full lg:w-1/3 lg:py-8"
+          @click="$router.push('/services')"
+          >Browse Services</UiButton
+        >
       </div>
 
       <div class="absolute left-0 right-0 bottom-4 flex justify-center">
         <Icon
-          name="i-material-symbols-light:arrow-downward-alt-rounded"
+          name="i-fa:arrow-down"
           size="64"
-          class="text-secondary animate-bounce"
+          class="text-secondary animate-bounce hover:cursor-pointer"
           @click="howItWorksEl?.scrollIntoView({ behavior: 'smooth' })"
         />
       </div>
@@ -102,7 +114,7 @@
           </h3>
         </div>
       </div>
-      <UiButton ">Add your Services Today!</UiButton>
+      <UiButton>Add your Services Today!</UiButton>
     </div>
   </div>
 </template>

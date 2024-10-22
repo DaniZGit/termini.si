@@ -1,6 +1,6 @@
 <template>
   <div
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 pt-8 px-8 bg-neutral-white border-t-2 border-neutral-gray text-center lg:text-left"
+    class="max-w-screen-2xl mx-auto 2xl:border-x-2 border-primary grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 pt-8 px-8 bg-neutral-white border-t-2 border-neutral-gray text-center lg:text-left"
   >
     <div>
       <h2 class="text-xl text-primary font-bold mb-2">Quick Links</h2>
@@ -60,8 +60,8 @@
           <Icon name="i-material-symbols-light:android" size="26"
         /></UiButton>
         <UiButton class="flex justify-center gap-x-2">
-          <span> Download for iOS </span>
           <Icon name="i-ic:outline-apple" size="26" />
+          <span> Download for iOS </span>
         </UiButton>
       </div>
     </div>

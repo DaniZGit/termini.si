@@ -1,6 +1,8 @@
 <template>
-  <div class="overflow-hidden">
-    <div class="h-16 overflow-hidden p-2 border-b-2 border-primary bg-white">
+  <div class="max-w-screen-2xl mx-auto overflow-hidden">
+    <div
+      class="h-16 overflow-hidden p-2 border-b-2 2xl:border-x-2 border-primary bg-white"
+    >
       <div class="h-full flex justify-between items-center relative">
         <NuxtLink to="/" class="h-full py-1" @click="hideMenu">
           <img src="/images/logo-side-spaceless.png" class="h-full" />
@@ -11,13 +13,13 @@
             v-if="user"
             name="i-ic:baseline-person-outline"
             size="28"
-            class="text-primary"
+            class="text-primary hover:cursor-pointer"
             @click="$router.push('/profile')"
           />
           <Icon
             :name="menuIsOpened ? 'i-ic:round-close' : 'i-ic:round-menu'"
             size="32"
-            class="text-primary"
+            class="text-primary hover:cursor-pointer"
             @click="onMenuOpen"
           />
         </div>
@@ -50,7 +52,7 @@
                     >
                       {{ user?.tokens }}
                     </span>
-                    <span> žetonov</span>
+                    <span> tokens</span>
                   </div>
                   <NuxtLink to="/tokens">
                     <Icon
@@ -82,13 +84,13 @@
                 @click="onLinkClick('/profile')"
               >
                 <Icon name="i-ic:sharp-person-outline" size="32" />
-                <span>Profil</span>
+                <span>Profile</span>
               </UiButton>
               <UiButton
                 class="flex items-center justify-center gap-x-2 !bg-neutral-red"
                 @click="onLogout"
               >
-                <span>Odjava</span>
+                <span>Logout</span>
                 <Icon name="i-ic:round-logout" size="32" />
               </UiButton>
             </div>
@@ -97,7 +99,7 @@
                 class="flex items-center justify-center gap-x-2 mx-auto"
                 @click="onLinkClick('/login')"
               >
-                <span>Prijava</span>
+                <span>Login</span>
                 <Icon name="i-ic:round-login" size="32" />
               </UiButton>
             </div>
@@ -114,23 +116,23 @@
 
   const links = [
     {
-      title: "Domov",
+      title: "Home",
       url: "/",
     },
     {
-      title: "O sistemu",
+      title: "About System",
       url: "/system",
     },
     {
-      title: "Inštitucije",
+      title: "Institutions",
       url: "/institutions",
     },
     {
-      title: "Storitve",
+      title: "Services",
       url: "/services",
     },
     {
-      title: "Žetoni",
+      title: "Tokens",
       url: "/tokens",
     },
   ];

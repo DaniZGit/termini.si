@@ -1,11 +1,11 @@
 <template>
-  <div class="bg-neutral-white pb-16">
+  <div class="w-full h-full bg-neutral-white">
     <div>
       <div class="text-center px-4 py-4">
-        <h1 class="text-3xl font-semibold text-secondary">Ustanove</h1>
+        <h1 class="text-3xl font-semibold text-secondary">Institutions</h1>
       </div>
 
-      <div class="px-4 pb-4">
+      <div class="w px-4 pb-4">
         <FilterInstitutions
           @search="onSearch"
           @filter="onFilter"
@@ -14,21 +14,24 @@
 
       <div
         v-if="fetchingInstitutions != 'pending'"
-        class="flex flex-col gap-y-4"
+        class="my-auto flex flex-col gap-y-4"
       >
-        <ItemInstitution
-          v-for="institution in institutions"
-          :key="institution.id"
-          :institution="institution"
-        >
-        </ItemInstitution>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+          <ItemInstitution
+            v-for="institution in institutions"
+            :key="institution.id"
+            :institution="institution"
+          >
+          </ItemInstitution>
+        </div>
 
         <UiPagination
           v-model="currentPage"
           :total-pages="getPageCount()"
+          class="mt-4 mb-8"
         ></UiPagination>
       </div>
-      <div v-else class="pt-16">
+      <div v-else class="py-16">
         <UiLoader></UiLoader>
       </div>
     </div>
@@ -75,6 +78,7 @@
   } = await useLazyAsyncData<ApiInstitution[]>(
     "institutionsCollection",
     () =>
+      /* @ts-ignore */
       readItems("institutions", {
         fields: [
           "id",

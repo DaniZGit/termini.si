@@ -41,12 +41,44 @@
   }
 
   .checkbox {
-    @apply appearance-none w-4 h-4 text-primary border-2 border-secondary rounded-sm checked:bg-secondary flex items-baseline justify-center;
+    @apply appearance-none w-4 h-4 text-primary border-2 border-secondary rounded-sm checked:bg-secondary flex items-baseline justify-center hover:cursor-pointer;
   }
 
   .checkbox:checked::before {
     content: "";
     @apply absolute block w-1.5 h-2.5 border-neutral-white border-b-2 border-r-2;
     @apply rotate-45;
+  }
+
+  .rte ol,
+  ul {
+    @apply pl-6;
+  }
+
+  .rte ul li {
+    @apply list-disc;
+  }
+  .rte ol li {
+    @apply list-decimal;
+  }
+
+  .rte h1 {
+    @apply text-3xl font-bold text-secondary;
+  }
+
+  .rte h2 {
+    @apply text-2xl font-semibold text-secondary;
+  }
+
+  .rte h3 {
+    @apply text-xl font-semibold text-secondary;
+  }
+
+  .rte a {
+    @apply text-secondary;
+  }
+
+  .rte blockquote {
+    @apply p-2 border-s-4 border-primary;
   }
 }

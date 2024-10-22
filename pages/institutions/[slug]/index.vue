@@ -7,12 +7,12 @@
     </div>
 
     <!-- Institution images -->
-    <div v-if="institution?.images.length">
+    <div v-if="institution?.images.length" class="lg:px-4">
       <ClientOnly>
         <swiper-container
-          pagination="true"
-          :slides-per-view="width > 1000 ? 2 : 1"
+          :slides-per-view="width > 1024 ? 2 : 1"
           :spaceBetween="30"
+          pagination="true"
         >
           <swiper-slide v-for="image in institution.images" :key="image"
             ><NuxtImg
@@ -24,48 +24,57 @@
       </ClientOnly>
     </div>
 
-    <!-- Institution info -->
-    <div class="px-4 py-4 flex flex-col md:flex-row gap-y-2 gap-x-6">
-      <div v-if="institution?.address" class="flex gap-x-2">
-        <Icon
-          name="i-ic:round-location-on"
-          size="18"
-          class="shrink-0 my-auto text-secondary"
-        />
-        <span class="text-neutral-darkGray font-medium">
-          {{ beautifyInstitutionAddress(institution) }}</span
-        >
+    <div class="flex flex-col md:flex-row gap-2 p-4">
+      <!-- Institution info -->
+      <div
+        class="shrink-0 p-4 flex flex-col gap-y-2 gap-x-6 border-2 border-primary"
+      >
+        <h1 class="text-secondary text-lg font-semibold">Info Card</h1>
+        <div v-if="institution?.address" class="flex gap-x-2">
+          <Icon
+            name="i-ic:round-location-on"
+            size="18"
+            class="shrink-0 my-auto text-secondary"
+          />
+          <span class="text-neutral-darkGray font-medium">
+            {{ beautifyInstitutionAddress(institution) }}</span
+          >
+        </div>
+        <div v-if="institution?.phone" class="flex gap-x-2">
+          <Icon
+            name="i-ic:baseline-local-phone"
+            size="18"
+            class="shrink-0 my-auto text-secondary"
+          />
+          <span class="text-neutral-darkGray font-medium">
+            {{ institution.phone }}</span
+          >
+        </div>
+        <div v-if="institution?.website" class="flex gap-x-2">
+          <Icon
+            name="i-ic:baseline-insert-link"
+            size="18"
+            class="shrink-0 my-auto text-secondary"
+          />
+          <NuxtLink
+            :to="institution.website"
+            :external="true"
+            target="_blank"
+            class="link"
+          >
+            {{ institution.website }}
+          </NuxtLink>
+        </div>
       </div>
-      <div v-if="institution?.phone" class="flex gap-x-2">
-        <Icon
-          name="i-ic:baseline-local-phone"
-          size="18"
-          class="shrink-0 my-auto text-secondary"
-        />
-        <span class="text-neutral-darkGray font-medium">
-          {{ institution.phone }}</span
-        >
-      </div>
-      <div v-if="institution?.website" class="flex gap-x-2">
-        <Icon
-          name="i-ic:baseline-insert-link"
-          size="18"
-          class="shrink-0 my-auto text-secondary"
-        />
-        <NuxtLink
-          :to="institution.website"
-          :external="true"
-          target="_blank"
-          class="link"
-        >
-          {{ institution.website }}
-        </NuxtLink>
-      </div>
-    </div>
 
-    <!-- Institution description -->
-    <div v-if="institution?.content" class="px-4 py-4">
-      <div v-html="institution?.content" class="text-neutral-darkGray"></div>
+      <!-- Institution description -->
+      <div v-if="institution?.content" class="grow p-4 border-2 border-primary">
+        <h1 class="text-secondary text-lg font-semibold">Description</h1>
+        <div
+          v-html="institution?.content"
+          class="rte text-neutral-darkGray"
+        ></div>
+      </div>
     </div>
 
     <!-- schedule -->
@@ -73,7 +82,7 @@
       v-if="institution && institutionStatus != 'pending'"
       class="p-4 flex flex-col gap-y-2 rounded-md"
     >
-      <h2 class="text-2xl font-semibold text-secondary">Termini</h2>
+      <h2 class="text-2xl font-semibold text-secondary">Schedule</h2>
       <div class="flex flex-col gap-y-4">
         <UiDatePicker
           v-model="selectedDate"
@@ -139,6 +148,7 @@
   import type { Timetable, TimetableSlot } from "~/types/misc";
   import type { ApiDayDefinition, ApiSlot } from "~/types/schedule";
   import type { ApiService, ApiVariant } from "~/types/service";
+
   register(); // registers swiper elements
 
   const { readItems } = useDirectusItems();

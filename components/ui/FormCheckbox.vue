@@ -8,7 +8,10 @@
       :value="value"
       class="checkbox"
     />
-    <label :for="id" class="text-md text-neutral-darkGray font-semibold">
+    <label
+      :for="id"
+      class="text-md text-neutral-darkGray font-semibold hover:cursor-pointer"
+    >
       {{ label }}
     </label>
   </div>

@@ -17,11 +17,11 @@
         class="h-full grid grid-flow-row grid-rows-12 gap-y-2 text-neutral-darkGray p-4"
       >
         <div class="row-span-1 flex items-center justify-between">
-          <h2 class="text-2xl text-secondary font-bold">Termini</h2>
+          <h2 class="text-2xl text-secondary font-bold">Slots</h2>
           <Icon
             name="i-ic:outline-cancel"
             size="28"
-            class="text-secondary"
+            class="text-secondary hover:cursor-pointer"
             @click="onClose"
           />
         </div>
@@ -68,7 +68,7 @@
               <div class="flex items-center gap-x-0.5">
                 <select
                   v-model="selectedPlan"
-                  class="text-neutral-darkGray border-2 border-secondary rounded-lg px-1 py-0.5"
+                  class="text-neutral-darkGray border-2 border-secondary rounded-lg px-1 py-0.5 hover:cursor-pointer"
                 >
                   <option
                     v-for="plan in getUserPlans()"
@@ -182,8 +182,8 @@
   };
 
   const getButtonText = () => {
-    if (reservationStatus.value == "pending") return "V teku rezervacije";
-    else if (reservationStatus.value == "success") return "Rezervirano";
+    if (reservationStatus.value == "pending") return "Booking...";
+    else if (reservationStatus.value == "success") return "Booked";
 
     if (usePlan.value) {
       if (
@@ -192,10 +192,10 @@
       )
         return "Ni dovolj rezervacij";
     } else {
-      if (user.value?.tokens < getTotalAmount()) return "Ni dovolj žetonov";
+      if (user.value?.tokens < getTotalAmount()) return "Not enough tokens";
     }
 
-    return "Rezerviraj";
+    return "Book";
   };
 
   watch(visible, () => {

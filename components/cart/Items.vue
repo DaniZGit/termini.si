@@ -34,7 +34,7 @@
               v-if="removable"
               name="i-mdi:close-thick"
               size="20"
-              class="text-neutral-gray"
+              class="text-neutral-gray hover:cursor-pointer"
               @click="onRemove(slot)"
             />
           </div>

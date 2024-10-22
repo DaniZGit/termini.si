@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-y-4 p-4 text-neutral-darkGray">
       <div>
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Profil
+          Profile
         </h1>
       </div>
 
@@ -38,7 +38,7 @@
           </div>
 
           <div class="flex justify-between gap-x-2 -mt-4">
-            <span> Število žetonov: </span>
+            <span> Tokens amount: </span>
 
             <div class="flex gap-x-2">
               <span
@@ -58,7 +58,7 @@
         </div>
 
         <div>
-          <h2 class="text-2xl font-bold">Rezervacije</h2>
+          <h2 class="text-2xl font-bold">Reservations</h2>
           <div class="relative">
             <div v-if="reservations?.length" class="flex flex-col">
               <NuxtLink
@@ -71,7 +71,9 @@
               </NuxtLink>
             </div>
             <div v-else>
-              <h3 class="text-xl text-center py-4">Trenutno ni rezervacij</h3>
+              <h3 class="text-xl text-center py-4">
+                Currently there are no reservations
+              </h3>
             </div>
             <div
               v-if="fetchingReservations == 'pending'"
@@ -88,11 +90,12 @@
             v-show="fetchingReservations != 'pending'"
             v-model="reservationsPage"
             :total-pages="getReservationsPageCount()"
+            class="mt-4"
           ></UiPagination>
         </div>
 
         <div>
-          <h2 class="text-2xl font-bold">Transakcije</h2>
+          <h2 class="text-2xl font-bold">Transactions</h2>
 
           <div class="relative">
             <div v-if="transactions?.length" class="flex flex-col gap-y-2">
@@ -106,7 +109,9 @@
               </NuxtLink>
             </div>
             <div v-else>
-              <h3 class="text-xl text-center py-4">Trenutno ni transakcij</h3>
+              <h3 class="text-xl text-center py-4">
+                Currently there are no transactions
+              </h3>
             </div>
 
             <div
@@ -124,6 +129,7 @@
             v-show="fetchingTransactions != 'pending'"
             v-model="transactionsPage"
             :total-pages="getTransactionsPageCount()"
+            class="my-4"
           ></UiPagination>
         </div>
       </div>

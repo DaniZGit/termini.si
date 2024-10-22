@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-y-8 text-neutral-darkGray bg-neutral-white">
     <div
-      class="flex flex-col justify-center gap-y-8 px-4 h-dvh -mt-14 relative bg-[55%] lg:bg-[60%] bg-no-repeat"
+      class="flex flex-col justify-center gap-y-8 px-4 h-dvh -mt-14 relative bg-[55%] lg:bg-[60%] xl:bg-[70%] 2xl:bg-[110%] bg-no-repeat bg-cover"
       style="
         background-image: url('/images/homepage.png');
         box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.5);
@@ -114,7 +114,13 @@
           </h3>
         </div>
       </div>
-      <UiButton>Add your Services Today!</UiButton>
+      <div class="flex flex-col items-center sm:flex-row gap-x-4 gap-y-2">
+        <UiButton>Add your Services Today!</UiButton>
+        <span class="text-lg text-secondary underline underline-offset-2"
+          >or</span
+        >
+        <UiButton>Contact Us for More Info!</UiButton>
+      </div>
     </div>
   </div>
 </template>

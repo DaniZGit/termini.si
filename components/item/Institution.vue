@@ -67,7 +67,7 @@
         @touchstart="focus = true"
         @touchend="focus = false"
       >
-        <UiButton class="w-full group">Ogled terminov</UiButton>
+        <UiButton class="w-full group">View available services</UiButton>
       </NuxtLink>
     </div>
   </div>

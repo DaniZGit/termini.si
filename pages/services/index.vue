@@ -11,21 +11,21 @@
         </span>
       </div>
 
-      <div class="grid grid-cols-2 px-4 gap-x-4 gap-y-4">
+      <div
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 px-4 gap-4 mb-8"
+      >
         <NuxtLink
           v-for="service in services"
-          :key="service"
           :to="`/institutions?services=${service}`"
-          class="flex flex-col justify-center items-center gap-y-2 aspect-square border-2 border-accent-lightGreen hover:ring-2 ring-accent-lightGreen rounded-lg transition-all duration-200"
+          class="flex flex-col justify-center items-center gap-y-2 aspect-square border-2 border-accent-lightGreen hover:ring-2 ring-accent-lightGreen rounded-lg transition-all duration-200 p-8"
         >
-          <img
-            :src="useAssetUrl(null)"
-            class="aspect-square w-2/3 h-auto object-cover"
-            width="100"
-            height="100"
-          ></img>
-          <h4 class="text-center text-lg font-medmium text-secondary">
-            {{ getServiceTypeTitle(service) }}
+          <Icon
+            :name="service.icon"
+            size="100%"
+            class="text-primary aspect-square"
+          />
+          <h4 class="text-center text-xl font-medmium text-secondary">
+            {{ getServiceTypeTitle(service.value) }}
           </h4>
         </NuxtLink>
       </div>
@@ -34,7 +34,20 @@
 </template>
 
 <script lang="ts" setup>
-  const services = ["sports", "hairdressing", "wellness"];
+  const services = [
+    {
+      value: "sports",
+      icon: "i-ic:sharp-sports-tennis",
+    },
+    {
+      value: "wellness",
+      icon: "i-hugeicons:wellness",
+    },
+    {
+      value: "hairdressing",
+      icon: "i-guidance:hairdresser",
+    },
+  ];
 </script>
 
 <style></style>

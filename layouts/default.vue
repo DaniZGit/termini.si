@@ -1,16 +1,14 @@
 <template>
   <div class="h-dvh flex flex-col scroll-smooth">
-    <div ref="headerPlaceholder" class="h-16 shrink-0">a</div>
+    <div ref="headerPlaceholder" class="h-16 shrink-0"></div>
     <UiHeader
       class="header fixed top-0 left-0 right-0 -translate-y-full z-50 transition-transform"
       :class="{
         '!translate-y-0': isScrollingUp || headerIsVisible,
       }"
     ></UiHeader>
-    <div class="bg-accent-lightGreen">
-      <div class="max-w-screen-2xl mx-auto">
-        <slot />
-      </div>
+    <div class="w-full max-w-screen-2xl self-center grow">
+      <slot />
     </div>
     <UiFooter></UiFooter>
   </div>

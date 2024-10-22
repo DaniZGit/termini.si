@@ -1,11 +1,11 @@
 export default (service: string | null) => {
   switch (service) {
     case "sports":
-      return "Šport";
+      return "Sports";
     case "hairdressing":
-      return "Frizerstvo";
+      return "Hairdressing";
     case "fitness":
-      return "Fitnes";
+      return "Fitness";
     case "wellness":
       return "Wellness";
     default:

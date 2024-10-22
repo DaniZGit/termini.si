@@ -11,7 +11,7 @@
         v-model="search"
         name=""
         id=""
-        placeholder="Vnesi ime ustanove"
+        placeholder="Enter institution's name"
         class="w-full placeholder-neutral-gray py-1 outline-none [&::-webkit-search-cancel-button]:hidden px-2"
       />
       <div class="rounded-r-full border-l-2 border-primary">
@@ -19,7 +19,7 @@
           class="h-full py-1 rounded-r-full rounded-l-none text-sm border-none"
           @click="$emit('search', search)"
         >
-          Najdi
+          Search
         </UiButton>
       </div>
     </div>

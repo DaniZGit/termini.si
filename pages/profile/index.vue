@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-y-4 p-4 text-neutral-darkGray">
       <div>
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Profile
+          {{ $t("profile-title") }}
         </h1>
       </div>
 
@@ -38,7 +38,7 @@
           </div>
 
           <div class="flex justify-between gap-x-2 -mt-4">
-            <span> Tokens amount: </span>
+            <span> {{ $t("profile-tokens-title") }} </span>
 
             <div class="flex gap-x-2">
               <span
@@ -58,7 +58,9 @@
         </div>
 
         <div>
-          <h2 class="text-2xl font-bold">Reservations</h2>
+          <h2 class="text-2xl font-bold">
+            {{ $t("profile-reservations-title") }}
+          </h2>
           <div class="relative">
             <div v-if="reservations?.length" class="flex flex-col">
               <NuxtLink
@@ -72,7 +74,7 @@
             </div>
             <div v-else>
               <h3 class="text-xl text-center py-4">
-                Currently there are no reservations
+                {{ $t("profile-reservations-empty-title") }}
               </h3>
             </div>
             <div
@@ -95,7 +97,9 @@
         </div>
 
         <div>
-          <h2 class="text-2xl font-bold">Transactions</h2>
+          <h2 class="text-2xl font-bold">
+            {{ $t("profile-transactions-title") }}
+          </h2>
 
           <div class="relative">
             <div v-if="transactions?.length" class="flex flex-col gap-y-2">
@@ -110,7 +114,7 @@
             </div>
             <div v-else>
               <h3 class="text-xl text-center py-4">
-                Currently there are no transactions
+                {{ $t("profile-reservations-empty-title") }}
               </h3>
             </div>
 

@@ -9,10 +9,10 @@
     >
       <div class="flex flex-col gap-y-4 text-center">
         <h1 class="text-primary text-4xl font-bold">
-          Book Your Perfect Slot at Leading Institutions
+          {{ $t("homepage-hero-title") }}
         </h1>
         <h4 class="text-lg text-neutral-darkGray">
-          From wellness to sports, find and reserve slots with ease.
+          {{ $t("homepage-hero-subtitle") }}
         </h4>
       </div>
 
@@ -20,13 +20,15 @@
         <UiButton
           class="w-full lg:w-1/3 lg:py-8"
           @click="$router.push('/institutions')"
-          >Find an institution</UiButton
         >
+          {{ $t("homepage-hero-institutions-button") }}
+        </UiButton>
         <UiButton
           class="w-full lg:w-1/3 lg:py-8"
           @click="$router.push('/services')"
-          >Browse Services</UiButton
         >
+          {{ $t("homepage-hero-services-button") }}
+        </UiButton>
       </div>
 
       <div class="absolute left-0 right-0 bottom-4 flex justify-center">
@@ -43,7 +45,7 @@
 
     <div ref="howItWorksEl" class="px-4">
       <h2 class="text-primary text-3xl text-center font-bold mb-8">
-        How It Works
+        {{ $t("homepage-hiw-title") }}
       </h2>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 text-neutral-white"
@@ -67,11 +69,10 @@
 
     <div class="px-4">
       <h2 class="text-primary text-3xl text-center font-bold mb-2">
-        Discover Our Services
+        {{ $t("homepage-dos-title") }}
       </h2>
       <h4 class="text-center mb-8">
-        Explore a variety of services tailored to your needs, from fitness and
-        sports to wellness and beauty.
+        {{ $t("homepage-dos-description") }}
       </h4>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-2 text-neutral-white"
@@ -91,7 +92,9 @@
               </li>
             </ul>
           </div>
-          <UiButton class="mt-auto">View available Institutions</UiButton>
+          <UiButton class="mt-auto">{{
+            $t("homepage-dos-institutions-button")
+          }}</UiButton>
         </div>
       </div>
     </div>
@@ -100,7 +103,7 @@
 
     <div class="flex flex-col items-center gap-y-8 px-4 pb-8">
       <h2 class="text-primary text-3xl text-center font-bold">
-        Why Choose Us?
+        {{ $t("homepage-wcu-title") }}
       </h2>
       <div class="inline-grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
         <div v-for="reason in chooseUsReasons" class="inline-flex gap-x-2">
@@ -115,11 +118,11 @@
         </div>
       </div>
       <div class="flex flex-col items-center sm:flex-row gap-x-4 gap-y-2">
-        <UiButton>Add your Services Today!</UiButton>
+        <UiButton>{{ $t("homepage-wcu-services-button") }}</UiButton>
         <span class="text-lg text-secondary underline underline-offset-2"
           >or</span
         >
-        <UiButton>Contact Us for More Info!</UiButton>
+        <UiButton>{{ $t("homepage-wcu-contact-button") }}</UiButton>
       </div>
     </div>
   </div>
@@ -135,72 +138,83 @@
     }
   };
 
+  const { t } = useI18n();
+
   const howItWorksEl = ref<HTMLElement | null>(null);
 
   const workingCards = [
     {
       title: "1",
-      subtitle: "Choose Your Institution",
-      description:
-        "Browse our directory of registered institutions offering a range of services.",
+      subtitle: t("homepage-hiw-one-subtitle"),
+      description: t("homepage-hiw-one-description"),
     },
     {
       title: "2",
-      subtitle: "Select Your Service",
-      description:
-        "Pick the service you need, whether it's a sports field, hairdresser, or wellness therapy.",
+      subtitle: t("homepage-hiw-two-subtitle"),
+      description: t("homepage-hiw-two-description"),
     },
     {
       title: "3",
-      subtitle: "View Available Slots",
-      description:
-        "See real-time availability and schedule options directly from the institution.",
+      subtitle: t("homepage-hiw-three-subtitle"),
+      description: t("homepage-hiw-three-description"),
     },
     {
       title: "4",
-      subtitle: "Reserve Your Slot",
-      description: "Easily reserve your spot and pay using plans or tokens.",
+      subtitle: t("homepage-hiw-four-subtitle"),
+      description: t("homepage-hiw-four-description"),
     },
   ];
 
   const services = [
     {
-      title: "Wellness & Spa",
-      description:
-        "Indulge in massages, therapies, and spa treatments for ultimate relaxation.",
-      points: ["Massages", "Aromatherapy", "Facials"],
+      title: t("homepage-dos-wellness-title"),
+      description: t("homepage-dos-wellness-description"),
+      points: [
+        t("homepage-dos-wellness-massages"),
+        t("homepage-dos-wellness-aromatherapy"),
+        t("homepage-dos-wellness-facials"),
+      ],
     },
     {
-      title: "Sports & Fitness",
-      description:
-        "Book your next sports session or fitness class at top-notch institutions.",
-      points: ["Sports Courts", "Personal Training", "Group Classes"],
+      title: t("homepage-dos-sports-title"),
+      description: t("homepage-dos-sports-description"),
+      points: [
+        t("homepage-dos-sports-courts"),
+        t("homepage-dos-sports-training"),
+        t("homepage-dos-sports-classes"),
+      ],
     },
     {
-      title: "Hair & Beauty",
-      description: "Get pampered by professional hairdressers and beauticians.",
-      points: ["Haircuts", "Hair Coloring", "Nail Services"],
+      title: t("homepage-dos-beauty-title"),
+      description: t("homepage-dos-beauty-description"),
+      points: [
+        t("homepage-dos-beauty-haircuts"),
+        t("homepage-dos-beauty-coloring"),
+        t("homepage-dos-beauty-nails"),
+      ],
     },
     {
-      title: "Education",
-      description:
-        "Join a variety of classes and workshops to enhance your skills and knowledge.",
-      points: ["Art Classes", "Educational Seminars"],
+      title: t("homepage-dos-education-title"),
+      description: t("homepage-dos-education-description"),
+      points: [
+        t("homepage-dos-education-art"),
+        t("homepage-dos-education-seminars"),
+      ],
     },
   ];
 
   const chooseUsReasons = [
     {
-      title: "Real-Time Availability",
+      title: t("homepage-wcu-reason-one-title"),
     },
     {
-      title: "Variety of Services",
+      title: t("homepage-wcu-reason-two-title"),
     },
     {
-      title: "Easy Booking Process",
+      title: t("homepage-wcu-reason-three-title"),
     },
     {
-      title: "Flexible Payment Options",
+      title: t("homepage-wcu-reason-four-title"),
     },
   ];
 </script>

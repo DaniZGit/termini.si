@@ -2,11 +2,13 @@
   <div class="bg-neutral-white">
     <div>
       <div class="text-center px-4 py-4">
-        <h1 class="text-3xl font-semibold text-secondary">Izberi Storitev</h1>
+        <h1 class="text-3xl font-semibold text-secondary">
+          {{ $t("services-title") }}
+        </h1>
         <span class="text-neutral-darkGray">
-          Ali pa poišči ustanovo preko
+          {{ $t("services-subtitle") }}
           <NuxtLink to="/institutions">
-            <span class="link">iskalnika.</span>
+            <span class="link">{{ $t("services-subtitle-link") }}</span>
           </NuxtLink>
         </span>
       </div>
@@ -16,7 +18,7 @@
       >
         <NuxtLink
           v-for="service in services"
-          :to="`/institutions?services=${service}`"
+          :to="localPath(`/institutions?services=${service.value}`)"
           class="flex flex-col justify-center items-center gap-y-2 aspect-square border-2 border-accent-lightGreen hover:ring-2 ring-accent-lightGreen rounded-lg transition-all duration-200 p-8"
         >
           <Icon
@@ -34,6 +36,8 @@
 </template>
 
 <script lang="ts" setup>
+  const localPath = useLocalePath();
+
   const services = [
     {
       value: "sports",

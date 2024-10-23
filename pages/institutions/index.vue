@@ -2,7 +2,9 @@
   <div class="w-full h-full bg-neutral-white">
     <div>
       <div class="text-center px-4 py-4">
-        <h1 class="text-3xl font-semibold text-secondary">Institutions</h1>
+        <h1 class="text-3xl font-semibold text-secondary">
+          {{ $t("institutions-title") }}
+        </h1>
       </div>
 
       <div class="w px-4 pb-4">
@@ -16,7 +18,9 @@
         v-if="fetchingInstitutions != 'pending'"
         class="my-auto flex flex-col gap-y-4"
       >
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:px-4"
+        >
           <ItemInstitution
             v-for="institution in institutions"
             :key="institution.id"

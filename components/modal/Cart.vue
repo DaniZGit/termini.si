@@ -17,7 +17,9 @@
         class="h-full grid grid-flow-row grid-rows-12 gap-y-2 text-neutral-darkGray p-4"
       >
         <div class="row-span-1 flex items-center justify-between">
-          <h2 class="text-2xl text-secondary font-bold">Slots</h2>
+          <h2 class="text-2xl text-secondary font-bold">
+            {{ $t("cart-slots-title") }}
+          </h2>
           <Icon
             name="i-ic:outline-cancel"
             size="28"
@@ -29,10 +31,10 @@
         <div class="row-span-10 flex flex-col gap-y-2">
           <div v-if="!cartStore.slots.length" class="my-auto text-center">
             <span class="text-neutral-darkGray">
-              Trenutno ni izbranih terminov. Poišči ustanovo preko
+              {{ $t("cart-empty-message") }}
             </span>
             <NuxtLink to="/institutions" class="link" @click="visible = false">
-              iskalnika.
+              {{ $t("cart-empty-search-page-message") }}
             </NuxtLink>
           </div>
           <CartItems
@@ -44,7 +46,7 @@
           <hr class="border-primary border-2 rounded-full mt-auto" />
 
           <div class="flex justify-between text-secondary">
-            <span class="font-semibold">Skupna cena</span>
+            <span class="font-semibold">{{ $t("cart-total-price") }}</span>
             <span class="font-semibold underline underline-offset-2">
               {{ getTotalAmount().toFixed(2) }} €
             </span>
@@ -60,7 +62,7 @@
               <div>
                 <UiFormCheckbox
                   v-model="usePlan"
-                  label="Uporabi paket"
+                  :label="$t('cart-use-plan-title')"
                   id="use-plan"
                 >
                 </UiFormCheckbox>
@@ -84,15 +86,17 @@
               v-if="usePlan && selectedPlan"
               class="text-left text-neutral-red text-sm pt-1"
             >
-              <span> Število rezervacij na voljo v paketu: </span>
+              <span> {{ $t("cart-plan-reservations") }} </span>
               <span class="font-bold">
-                {{ selectedPlan.total_reservations }}.
+                {{ selectedPlan.total_reservations }}
               </span>
             </div>
             <div v-else class="text-left text-neutral-red text-sm pt-1">
               <span>
-                Rezervacija se plačuje v žetonih, več o tem si lahko preberete
-                <NuxtLink class="link">tukaj.</NuxtLink>
+                {{ $t("cart-tokens-disclaimer") }}
+                <NuxtLink class="link">{{
+                  $t("cart-tokens-disclaimer-link-title")
+                }}</NuxtLink>
               </span>
             </div>
           </div>
@@ -100,8 +104,10 @@
             <div class="flex flex-wrap justify-between items-center gap-y-1">
               <div class="text-left text-neutral-red text-sm pt-1">
                 <span>
-                  Rezervacija se plačuje v žetonih, več o tem si lahko preberete
-                  <NuxtLink class="link">tukaj.</NuxtLink>
+                  {{ $t("cart-tokens-disclaimer") }}
+                  <NuxtLink class="link">{{
+                    $t("cart-tokens-disclaimer-link-title")
+                  }}</NuxtLink>
                 </span>
               </div>
             </div>
@@ -142,6 +148,7 @@
   const stateStore = useStateStore();
   const cartStore = useCartStore();
   const route = useRoute();
+  const { t } = useI18n();
 
   const modal = ref<HTMLElement | null>(null);
   const visible = defineModel("visible", {
@@ -182,17 +189,20 @@
   };
 
   const getButtonText = () => {
-    if (reservationStatus.value == "pending") return "Booking...";
-    else if (reservationStatus.value == "success") return "Booked";
+    if (reservationStatus.value == "pending")
+      return t("cart-button-title-booking");
+    else if (reservationStatus.value == "success")
+      return t("cart-button-title-booked");
 
     if (usePlan.value) {
       if (
         selectedPlan.value?.total_reservations &&
         selectedPlan.value?.total_reservations <= 0
       )
-        return "Ni dovolj rezervacij";
+        return t("cart-button-title-lack-of-reservations");
     } else {
-      if (user.value?.tokens < getTotalAmount()) return "Not enough tokens";
+      if (user.value?.tokens < getTotalAmount())
+        return t("cart-button-title-lack-of-tokens");
     }
 
     return "Book";

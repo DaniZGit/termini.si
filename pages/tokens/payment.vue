@@ -3,15 +3,19 @@
     <div class="row-span-1 flex justify-center items-center">
       <div class="absolute left-0 px-2 my-auto">
         <NuxtLink
-          :to="`/tokens${
-            route.query.amount ? '?amount=' + $route.query.amount : ''
-          }`"
+          :to="
+            localPath(
+              `/tokens${
+                route.query.amount ? '?amount=' + $route.query.amount : ''
+              }`
+            )
+          "
         >
           <Icon name="i-mdi:arrow-left-thin" size="26" class="text-secondary" />
         </NuxtLink>
       </div>
       <h2 class="text-center text-2xl text-secondary font-bold py-2">
-        Plačilo
+        {{ $t("tokens-payment-title") }}
       </h2>
     </div>
     <!-- <hr class="h-1 border-0 bg-primary my-1" /> -->
@@ -39,7 +43,7 @@
           class="w-full h-full flex items-center justify-center px-4 py-16"
         >
           <h3 class="text-xl font-semibold text-neutral-red text-center">
-            Nekaj je šlo narobe, poskusite kasneje...
+            {{ $t("tokens-payment-error") }}
           </h3>
         </div>
         <!-- STRIPE ELEMENT-->
@@ -51,7 +55,7 @@
           "
           class="font-bold text-lg text-center"
         >
-          Vnesite podatke za plačilo
+          {{ $t("Enter payment information") }}
         </h2>
         <div
           v-show="
@@ -68,12 +72,12 @@
           v-show="status == 'success'"
           class="font-bold text-lg text-center py-16"
         >
-          <span>Plačilo je bilo uspešno, žetoni bodo kmalu na </span>
+          <span>{{ $t("tokens-payment-success-message") }} </span>
           <NuxtLink
-            to="/profile"
+            :to="localPath('/profile')"
             class="text-secondary underline underline-offset-2"
           >
-            <span>računu</span>
+            <span>{{ $t("tokens-payment-success-link-message") }}</span>
             <Icon name="i-ic:round-arrow-right-alt" size="32" />
           </NuxtLink>
         </div>
@@ -86,7 +90,7 @@
             @click="showTerms = !showTerms"
           >
             <h2 class="text-lg text-secondary font-semibold">
-              Splošni pogoji poslovanja
+              {{ $t("tokens-payment-conditions-title") }}
             </h2>
             <Icon
               name="i-ic:baseline-arrow-right"
@@ -98,16 +102,20 @@
             />
           </div>
           <div class="px-4" v-if="showTerms">
-            S tem je povezana obveznost plačila podjetju in strinjanje s
-            <NuxtLink to="/terms" class="text-primary font-medium underline"
-              >splošnimi pogoji poslovanja</NuxtLink
+            {{ $t("tokens-payment-conditions-description") }}
+            <NuxtLink
+              :to="localPath('/terms')"
+              class="text-primary font-medium underline"
+              >{{
+                $t("tokens-payment-conditions-description-link-title")
+              }}</NuxtLink
             >.
           </div>
         </div>
       </div>
     </div>
 
-    <div class="row-span-1 w-full h-full mt-auto">
+    <div class="row-span-1 w-full h-full">
       <UiButton
         class="w-full h-full flex justify-center items-center gap-x-2 rounded-none"
         :class="{
@@ -117,12 +125,12 @@
         @click="onPayment"
       >
         <div v-if="status == 'success'" class="flex items-center gap-x-2">
-          <span>Plačano</span>
+          <span>{{ $t("tokens-payment-button-status-success") }}</span>
           <Icon name="i-line-md:check-all" size="26" />
         </div>
         <span v-else-if="!issuingPayment">{{ getButtonText() }}</span>
         <div v-else class="flex items-center gap-x-2">
-          <span>Plačilo se izvršuje</span>
+          <span>{{ $t("tokens-payment-button-status-pending") }}</span>
           <Icon name="i-svg-spinners:bars-scale-fade" size="26" />
         </div>
       </UiButton>
@@ -136,6 +144,8 @@
   const route = useRoute();
   const config = useRuntimeConfig();
   const showTerms = ref(false);
+  const { t } = useI18n();
+  const localPath = useLocalePath();
 
   const stripe: Ref<Stripe> = await useClientStripe();
   const elements = ref<StripeElements | undefined>();
@@ -217,10 +227,11 @@
   };
 
   const getButtonText = () => {
-    if (status.value == "loading-stripe") return "Nalaganje plačilnega sistema";
+    if (status.value == "loading-stripe")
+      return t("tokens-payment-button-status-loading");
 
     const tokens = parseFloat(route.query.amount as string) || 0;
-    return `Plačaj ${tokens.toFixed(2)} €`;
+    return `${t("tokens-payment-button-status-pay")} ${tokens.toFixed(2)} €`;
   };
 </script>
 

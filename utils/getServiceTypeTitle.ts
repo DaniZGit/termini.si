@@ -1,16 +1,17 @@
 export default (service: string | null) => {
+  const { t } = useI18n();
   switch (service) {
     case "sports":
-      return "Sports";
+      return t("service-type-sports-title");
     case "hairdressing":
-      return "Hairdressing";
+      return t("service-type-hairdressing-title");
     case "fitness":
-      return "Fitness";
+      return t("service-type-fitness-title");
     case "wellness":
-      return "Wellness";
+      return t("service-type-wellness-title");
     default:
       break;
   }
 
-  return "Typeless Service";
+  return t("service-type-unhandled");
 };

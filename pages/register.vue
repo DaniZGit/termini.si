@@ -3,12 +3,11 @@
     <div class="flex flex-col gap-y-4 p-4">
       <div>
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Registracija računa
+          {{ $t("register-title") }}
         </h1>
         <div class="text-center flex flex-col items-center">
           <NuxtLink to="/tokens/help" class="text-neutral-darkGray">
-            Z obstoječim računom lahko rezervirate termine ter izvajate plačila
-            preko spleta.
+            {{ $t("register-description") }}
           </NuxtLink>
         </div>
       </div>
@@ -21,7 +20,7 @@
         <div>
           <UiFormInput
             v-model="firstName"
-            label="Ime"
+            :label="$t('register-input-name-label')"
             type="text"
             name="first_name"
             id="first_name"
@@ -32,7 +31,7 @@
         <div>
           <UiFormInput
             v-model="lastName"
-            label="Priimek"
+            :label="$t('register-input-surname-label')"
             type="text"
             name="last_name"
             id="last_name"
@@ -43,7 +42,7 @@
         <div>
           <UiFormInput
             v-model="email"
-            label="Email"
+            :label="$t('register-input-email-label')"
             type="email"
             name="email"
             id="email"
@@ -54,7 +53,7 @@
         <div>
           <UiFormInput
             v-model="password"
-            label="Geslo"
+            :label="$t('register-input-password-label')"
             type="password"
             name="password"
             id="password"
@@ -65,7 +64,7 @@
         <div>
           <UiFormInput
             v-model="passwordConfirmation"
-            label="Potrdi geslo"
+            :label="$t('register-input-password-confirmation-label')"
             type="password"
             name="password_confirmation"
             id="password_confirmation"
@@ -76,14 +75,20 @@
 
         <div class="text-sm">
           <span class="text-neutral-darkGray">
-            Že imate račun? Prijavite se
+            {{ $t("register-no-account-description") }}
           </span>
-          <NuxtLink to="/login" class="link">tukaj.</NuxtLink>
+          <NuxtLink :to="localPath('/login')" class="link">{{
+            $t("register-no-account-description-link")
+          }}</NuxtLink>
         </div>
       </form>
 
       <UiButton form="register_form" type="submit">
-        {{ !registeringIn ? "Ustvari" : "Ustvarjanje računa..." }}
+        {{
+          !registeringIn
+            ? $t("register-idle-button")
+            : $t("register-pending-button")
+        }}
       </UiButton>
     </div>
   </div>
@@ -95,6 +100,7 @@
   const config = useRuntimeConfig();
   const router = useRouter();
   const { login } = useDirectusAuth();
+  const localPath = useLocalePath();
 
   const firstName = ref("");
   const lastName = ref("");

@@ -4,7 +4,7 @@
       class="h-16 overflow-hidden p-2 border-b-2 2xl:border-x-2 border-primary bg-white"
     >
       <div class="h-full flex justify-between items-center relative">
-        <NuxtLink to="/" class="h-full py-1" @click="hideMenu">
+        <NuxtLink :to="localePath('/')" class="h-full py-1" @click="hideMenu">
           <img src="/images/logo-side-spaceless.png" class="h-full" />
         </NuxtLink>
 
@@ -14,7 +14,7 @@
             name="i-ic:baseline-person-outline"
             size="28"
             class="text-primary hover:cursor-pointer"
-            @click="$router.push('/profile')"
+            @click="onLinkClick('/profile')"
           />
           <Icon
             :name="menuIsOpened ? 'i-ic:round-close' : 'i-ic:round-menu'"
@@ -52,9 +52,9 @@
                     >
                       {{ user?.tokens }}
                     </span>
-                    <span> tokens</span>
+                    <span class="ml-2">{{ $t("header-tokens") }}</span>
                   </div>
-                  <NuxtLink to="/tokens">
+                  <NuxtLink :to="localePath('/tokens')">
                     <Icon
                       name="i-ic:round-add-circle-outline"
                       size="22"
@@ -69,7 +69,7 @@
                 <NuxtLink
                   v-for="link in links"
                   :key="link.url"
-                  :to="link.url"
+                  :to="localePath(link.url)"
                   class="w-full header-link"
                   active-class="!bg-secondary !text-neutral-white"
                   @click="hideMenu"
@@ -78,30 +78,51 @@
                 </NuxtLink>
               </div>
             </div>
-            <div v-if="user" class="grid grid-cols-2 gap-x-8">
-              <UiButton
-                class="flex items-center justify-center gap-x-2"
-                @click="onLinkClick('/profile')"
-              >
-                <Icon name="i-ic:sharp-person-outline" size="32" />
-                <span>Profile</span>
-              </UiButton>
-              <UiButton
-                class="flex items-center justify-center gap-x-2 !bg-neutral-red"
-                @click="onLogout"
-              >
-                <span>Logout</span>
-                <Icon name="i-ic:round-logout" size="32" />
-              </UiButton>
-            </div>
-            <div v-else>
-              <UiButton
-                class="flex items-center justify-center gap-x-2 mx-auto"
-                @click="onLinkClick('/login')"
-              >
-                <span>Login</span>
-                <Icon name="i-ic:round-login" size="32" />
-              </UiButton>
+
+            <div class="flex flex-col gap-y-4">
+              <div v-if="user" class="grid grid-cols-2 gap-x-8">
+                <UiButton
+                  class="flex items-center justify-center gap-x-2"
+                  @click="onLinkClick('/profile')"
+                >
+                  <Icon name="i-ic:sharp-person-outline" size="32" />
+                  <span>{{ $t("header-profile-button") }}</span>
+                </UiButton>
+                <UiButton
+                  class="flex items-center justify-center gap-x-2 !bg-neutral-red"
+                  @click="onLogout"
+                >
+                  <span>{{ $t("header-logout-button") }}</span>
+                  <Icon name="i-ic:round-logout" size="32" />
+                </UiButton>
+              </div>
+              <div v-else>
+                <UiButton
+                  class="flex items-center justify-center gap-x-2 mx-auto"
+                  @click="onLinkClick('/login')"
+                >
+                  <span>{{ $t("header-login-button") }}</span>
+                  <Icon name="i-ic:round-login" size="32" />
+                </UiButton>
+              </div>
+
+              <!-- Lang Switch -->
+              <div class="flex justify-center gap-x-4">
+                <Icon
+                  name="i-twemoji:flag-slovenia"
+                  size="32"
+                  class="border-b-4 border-neutral-white transition-colors hover:cursor-pointer"
+                  :class="{ 'border-primary': locale == 'sl' }"
+                  @click="setLocale('sl')"
+                />
+                <Icon
+                  name="i-twemoji:flag-us-outlying-islands"
+                  size="32"
+                  class="border-b-4 border-neutral-white transition-colors hover:cursor-pointer"
+                  :class="{ 'border-primary': locale == 'en' }"
+                  @click="setLocale('en')"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -111,31 +132,33 @@
 </template>
 
 <script lang="ts" setup>
-  const router = useRouter();
   const { user, logout } = useDirectusAuth();
+  const { t, locale, setLocale } = useI18n();
+  const localePath = useLocalePath();
+  const localeRoute = useLocaleRoute();
 
-  const links = [
+  const links = computed(() => [
     {
-      title: "Home",
+      title: t("header-homepage-link-title"),
       url: "/",
     },
     {
-      title: "About System",
+      title: t("header-system-link-title"),
       url: "/system",
     },
     {
-      title: "Institutions",
+      title: t("header-institutions-link-title"),
       url: "/institutions",
     },
     {
-      title: "Services",
+      title: t("header-services-link-title"),
       url: "/services",
     },
     {
-      title: "Tokens",
+      title: t("header-tokens-link-title"),
       url: "/tokens",
     },
-  ];
+  ]);
 
   const onLogout = async () => {
     try {
@@ -152,8 +175,11 @@
   };
 
   const onLinkClick = (to: string) => {
-    router.push(to);
-    hideMenu();
+    const route = localeRoute({ path: to });
+    if (route) {
+      navigateTo(route.fullPath);
+      hideMenu();
+    }
   };
 
   const showMenu = () => {

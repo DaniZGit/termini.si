@@ -1,15 +1,16 @@
 <template>
   <div class="bg-neutral-white">
     <div class="text-center px-4 py-4">
-      <h1 class="text-3xl font-semibold text-secondary">Reserve žetoni</h1>
+      <h1 class="text-3xl font-semibold text-secondary">
+        {{ $t("tokens-title") }}
+      </h1>
       <div class="flex flex-col items-center">
         <NuxtLink to="/tokens/help" class="text-neutral-darkGray">
-          V primeru plačila preko spleta, so za rezervacijo igrišč potrebni
-          žetoni. Več o žetonih in njeni uporabi si lahko preberete
+          {{ $t("tokens-description") }}
           <span
             class="text-accent-lightBlue hover:text-secondary font-semibold underline underline-offset-2"
           >
-            tukaj.
+            {{ $t("tokens-description-link-title") }}
           </span>
         </NuxtLink>
       </div>
@@ -17,12 +18,12 @@
 
     <div class="pb-4">
       <h2 class="text-center text-2xl font-semibold text-primary">
-        1€ je 1 žeton
+        {{ $t("tokens-basic-explanation") }}
       </h2>
     </div>
 
     <div class="px-4 flex flex-col items-center gap-y-2 text-center">
-      <h4>Vnesite število žetonov, ki jih želite dodati na račun</h4>
+      <h4>{{ $t("tokens-input-header") }}</h4>
       <input
         v-model="tokens"
         name="tokens"
@@ -34,21 +35,23 @@
         @keydown="onInput"
       />
       <span v-show="tokens && tokens <= 5" class="text-neutral-red">
-        Naložiti morate vsaj 5 žetonov
+        {{ $t("tokens-input-error-title") }}
       </span>
     </div>
 
-    <div class="absolute bottom-0 left-0 right-0 text-center pb-4">
+    <div class="text-center py-8">
       <NuxtLink
         :to="
-          tokens && tokens > 5 ? `/tokens/payment?amount=${tokens}` : undefined
+          tokens && tokens > 5
+            ? localPath(`/tokens/payment?amount=${tokens}`)
+            : undefined
         "
       >
         <UiButton class="mt-auto" :disabled="!tokens || tokens <= 5">
           {{
             tokens
-              ? `Pojdi na plačilo (${tokens.toFixed(2)} €)`
-              : "Vnesi število žetonov"
+              ? `${$t("tokens-button-pay-title")} (${tokens.toFixed(2)} €)`
+              : $t("tokens-button-required-title")
           }}
         </UiButton>
       </NuxtLink>
@@ -57,6 +60,7 @@
 </template>
 
 <script lang="ts" setup>
+  const localPath = useLocalePath();
   const tokens = ref<number>();
 
   const onInput = (e: KeyboardEvent) => {

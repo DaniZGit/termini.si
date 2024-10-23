@@ -3,7 +3,7 @@
     <div class="p-4 text-neutral-darkGray">
       <div class="relative">
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Transakcija
+          {{ $t("transaction-title") }}
         </h1>
         <div class="absolute top-0 bottom-0 left-0 flex items-center">
           <NuxtLink to="/profile">
@@ -19,7 +19,7 @@
         v-if="fetchingTransaction != 'pending'"
         class="text-2xl text-secondary text-center"
       >
-        ( {{ getTypeText() }} )
+        ( {{ $t("transaction-type") }} )
       </h3>
 
       <div
@@ -28,7 +28,7 @@
       >
         <div>
           <div class="text-secondary font-semibold text-xl">
-            Datum in čas transakcije
+            {{ $t("transaction-time") }}
           </div>
           <div class="font-semibold">
             {{ getDateNice(transaction?.date_created ?? "") }}
@@ -39,18 +39,15 @@
 
         <div v-if="transaction?.type == 'topup'">
           <div class="text-secondary font-semibold text-xl">
-            Število žetonov
+            {{ $t("transaction-tokens-title") }}
           </div>
           <div class="font-semibold">55</div>
         </div>
 
-        <div
-          v-if="transaction?.type == 'topup'"
-          class="fixed bottom-0 left-0 right-0 p-4"
-        >
+        <div v-if="transaction?.type == 'topup'" class="p-4">
           <UiButton class="flex items-center justify-center gap-x-2 mx-auto">
             <Icon name="i-ic:baseline-receipt-long" size="32" />
-            <span>Prenesi račun</span>
+            <span>{{ $t("transaction-receipt-button") }}</span>
           </UiButton>
         </div>
       </div>
@@ -106,17 +103,6 @@
       },
     })
   );
-
-  const getTypeText = () => {
-    switch (transaction.value?.type) {
-      case "booking":
-        return "Rezervacija terminov";
-      case "topup":
-        return "Nakup žetonov";
-      default:
-        return "Drugo";
-    }
-  };
 </script>
 
 <style></style>

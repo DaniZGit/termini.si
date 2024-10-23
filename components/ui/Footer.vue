@@ -5,42 +5,45 @@
     <div>
       <h2 class="text-xl text-primary font-bold mb-2">Quick Links</h2>
       <div class="flex flex-col gap-y-1">
-        <NuxtLink v-for="link in quickLinks" :href="link.href" class="link">{{
-          link.title
-        }}</NuxtLink>
+        <NuxtLink
+          v-for="link in quickLinks"
+          :to="localPath(link.href)"
+          class="link"
+          >{{ link.title }}</NuxtLink
+        >
       </div>
     </div>
 
     <div>
       <h2 class="text-xl text-primary font-bold mb-2">Contact Info</h2>
       <div class="flex flex-col text-secondary font-semibold">
-        <span
-          >Email:
-          <span class="underline underline-offset-2"
-            >info@termini.si</span
-          ></span
-        >
-        <span
-          >Phone:
-          <span class="underline underline-offset-2">123-456-789</span></span
-        >
-        <span
-          >Address:
-          <span class="underline underline-offset-2"
-            >Slovenska cesta 7, 1000 Ljubljana</span
-          ></span
-        >
+        <span>
+          {{ $t("footer-email") }}
+          <span class="underline underline-offset-2"> info@termini.si </span>
+        </span>
+        <span>
+          {{ $t("footer-phone") }}
+          <span class="underline underline-offset-2"> 123-456-789 </span>
+        </span>
+        <span>
+          {{ $t("footer-address") }}
+          <span class="underline underline-offset-2">
+            Slovenska cesta 7, 1000 Ljubljana
+          </span>
+        </span>
       </div>
     </div>
 
     <div>
-      <h2 class="text-xl text-primary font-bold mb-2">Follow Us</h2>
+      <h2 class="text-xl text-primary font-bold mb-2">
+        {{ $t("footer-follow-us") }}
+      </h2>
       <div
         class="flex flex-col items-center lg:items-start gap-2 text-secondary font-semibold"
       >
         <NuxtLink
           v-for="social in socials"
-          :href="social.href"
+          :to="localPath(social.href)"
           class="flex items-center gap-x-2"
         >
           <Icon :name="social.icon" size="26" />
@@ -50,18 +53,20 @@
     </div>
 
     <div>
-      <h2 class="text-xl text-primary font-bold mb-2">Download Our App</h2>
+      <h2 class="text-xl text-primary font-bold mb-2">
+        {{ $t("footer-download-title") }}
+      </h2>
       <div class="text-secondary font-semibold mb-2">
-        Get the termini.si app for easy booking on the go!
+        {{ $t("footer-download-description") }}
       </div>
       <div class="flex flex-col gap-y-2">
         <UiButton class="flex justify-center gap-x-2">
-          <span> Download for Android </span>
+          <span> {{ $t("footer-download-android-button") }} </span>
           <Icon name="i-material-symbols-light:android" size="26"
         /></UiButton>
         <UiButton class="flex justify-center gap-x-2">
           <Icon name="i-ic:outline-apple" size="26" />
-          <span> Download for iOS </span>
+          <span> {{ $t("footer-download-ios-button") }} </span>
         </UiButton>
       </div>
     </div>
@@ -71,42 +76,45 @@
     >
       &copy;
       {{ new Date().getFullYear() }}
-      Termini. All rights reserved.
+      {{ $t("footer-copyright") }}
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  const quickLinks = [
+  const { t } = useI18n();
+  const localPath = useLocalePath();
+
+  const quickLinks = computed(() => [
     {
-      title: "Home",
+      title: t("header-homepage-link-title"),
       href: "/",
     },
     {
-      title: "Institutions",
+      title: t("header-institutions-link-title"),
       href: "/institutions",
     },
     {
-      title: "Services",
+      title: t("header-services-link-title"),
       href: "/services",
     },
     {
-      title: "Privacy Policy",
+      title: t("header-privacy-policy-link-title"),
       href: "/privacy-policy",
     },
     {
-      title: "Terms of Service",
+      title: t("header-tos-link-title"),
       href: "/tos",
     },
     {
-      title: "Contact Us",
+      title: t("header-contact-link-title"),
       href: "/contact",
     },
-  ];
+  ]);
 
   const socials = [
     {
-      title: "Novi Twitter",
+      title: "Twitter",
       icon: "i-hugeicons:new-twitter",
       href: "https://www.x.com",
     },

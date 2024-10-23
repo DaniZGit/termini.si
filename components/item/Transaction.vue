@@ -2,12 +2,12 @@
   <div class="flex justify-between items-center group py-2">
     <div class="flex flex-col">
       <span class="text-secondary text-lg font-semibold">
-        {{ getTypeText() }}
+        {{ $t("transaction-type") }}
       </span>
       <span class="font-semibold"
-        >{{ getDateNice(transaction?.date_created) }}
+        >{{ getDateNice(transaction?.date_created ?? "") }}
         ob
-        {{ getTimeNice(transaction?.date_created) }}</span
+        {{ getTimeNice(transaction?.date_created ?? "") }}</span
       >
     </div>
     <Icon
@@ -27,17 +27,6 @@
       type: Object as PropType<ApiTransaction>,
     },
   });
-
-  const getTypeText = () => {
-    switch (props.transaction?.type) {
-      case "booking":
-        return "Rezervacija terminov";
-      case "topup":
-        return "Nakup žetonov";
-      default:
-        return "Drugo";
-    }
-  };
 </script>
 
 <style></style>

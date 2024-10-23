@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@pinia-plugin-persistedstate/nuxt",
     "@unlok-co/nuxt-stripe",
+    "@nuxtjs/i18n",
   ],
   runtimeConfig: {
     public: {
@@ -53,6 +54,22 @@ export default defineNuxtConfig({
       // your api options override for stripe client side https://stripe.com/docs/js/initializing#init_stripe_js-options
       options: {},
     },
+  },
+  i18n: {
+    // Module Options
+
+    locales: [
+      {
+        code: "sl",
+        file: "sl-SI.json",
+      },
+      {
+        code: "en",
+        file: "en-US.json",
+      },
+    ],
+    langDir: "lang",
+    defaultLocale: "sl", // default locale of your project for Nuxt pages and routings
   },
   build: {
     transpile: ["@vuepic/vue-datepicker"],

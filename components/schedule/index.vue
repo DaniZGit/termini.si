@@ -2,10 +2,10 @@
   <div>
     <div v-if="loading">
       <div
-        class="w-full h-full flex flex-col items-center justify-center gap-y-8 mt-32 px-4"
+        class="w-full h-full flex flex-col items-center justify-center gap-y-8 my-16 px-4"
       >
         <h4 class="text-2xl font-medium text-secondary">
-          Nalaganje terminov...
+          {{ $t("schedule-loading-title") }}
         </h4>
         <UiLoader></UiLoader>
       </div>
@@ -34,7 +34,7 @@
         @slot-unselect="onSlotUnselected"
       ></ScheduleViewGrouped>
       <div v-else class="text-center">
-        Display type is not handled:
+        {{ $t("schedule-type-unhandled") }}
         <span class="font-bold">{{ displayType }}</span>
       </div>
     </div>
@@ -43,7 +43,7 @@
       class="text-center flex flex-col items-center gap-y-8 mt-32 px-4"
     >
       <h4 class="text-2xl font-medium text-neutral-darkGray">
-        Trenutno ni terminov za izbrani datum
+        {{ $t("schedule-empty-slots-title") }}
       </h4>
       <Icon
         name="i-ic:baseline-calendar-month"

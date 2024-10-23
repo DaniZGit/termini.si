@@ -3,10 +3,10 @@
     <div class="p-4 text-neutral-darkGray">
       <div class="relative">
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Rezervacija
+          {{ $t("reservation-title") }}
         </h1>
         <div class="absolute top-0 bottom-0 left-0 flex items-center">
-          <NuxtLink to="/profile">
+          <NuxtLink :to="localPath('/profile')">
             <Icon
               name="i-ic:round-arrow-back"
               size="26"
@@ -29,7 +29,9 @@
         class="flex flex-col justify-center gap-y-2 text-center"
       >
         <div>
-          <div class="text-secondary font-semibold text-xl">Naslov</div>
+          <div class="text-secondary font-semibold text-xl">
+            {{ $t("reservation-location") }}
+          </div>
           <div class="font-semibold">
             <span>
               {{
@@ -50,7 +52,7 @@
 
         <div>
           <div class="text-secondary font-semibold text-xl">
-            Datum in čas termina
+            {{ $t("reservation-slot-booking-time") }}
           </div>
           <div class="font-semibold">
             <span class="font-semibold"
@@ -64,7 +66,7 @@
 
         <div>
           <div class="text-secondary font-semibold text-xl">
-            Datum in čas rezervacije
+            {{ $t("reservation-slot-transaction-time") }}
           </div>
           <div class="font-semibold">
             {{ getDateNice(reservation?.date_updated ?? "") }}
@@ -73,9 +75,7 @@
           </div>
         </div>
 
-        <div
-          class="absolute bottom-0 left-0 right-0 p-4 grid grid-cols-2 gap-x-8"
-        >
+        <div class="p-4 grid grid-cols-2 gap-x-4">
           <UiButton
             class="flex items-center justify-center gap-x-2"
             @click="
@@ -84,8 +84,12 @@
               )
             "
           >
-            <Icon name="i-ic:twotone-calendar-month" size="32" />
-            <span>Ustanova</span>
+            <Icon
+              name="i-ic:twotone-calendar-month"
+              size="32"
+              class="shrink-0"
+            />
+            <span>{{ $t("reservation-institution-button") }}</span>
           </UiButton>
 
           <UiButton
@@ -95,12 +99,16 @@
           >
             <span>{{
               reservation?.status == "confirmed"
-                ? "Prekliči"
+                ? $t("reservation-cancel-button")
                 : reservation?.status == "canceled"
-                ? "Preklicano"
-                : "Drugo"
+                ? $t("reservation-canceled-button")
+                : $t("reservation-other-button")
             }}</span>
-            <Icon name="i-ic:round-free-cancellation" size="32" />
+            <Icon
+              name="i-ic:round-free-cancellation"
+              size="32"
+              class="shrink-0"
+            />
           </UiButton>
         </div>
       </div>
@@ -122,6 +130,7 @@
   const route = useRoute();
   const { readItem } = useDirectusItems();
   const { user } = useDirectusAuth();
+  const localPath = useLocalePath();
 
   const {
     data: reservation,

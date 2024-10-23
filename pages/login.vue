@@ -3,12 +3,11 @@
     <div class="flex flex-col gap-y-4 p-4">
       <div>
         <h1 class="text-center text-3xl font-semibold text-secondary">
-          Prijava v sistem
+          {{ $t("login-title") }}
         </h1>
         <div class="text-center flex flex-col items-center">
           <NuxtLink to="/tokens/help" class="text-neutral-darkGray">
-            Z obstoječim računom lahko rezervirate termine ter izvajate plačila
-            preko spleta.
+            {{ $t("login-description") }}
           </NuxtLink>
         </div>
       </div>
@@ -21,7 +20,7 @@
         <div>
           <UiFormInput
             v-model="email"
-            label="Email"
+            :label="$t('login-input-email-label')"
             type="email"
             name="email"
             id="email"
@@ -32,7 +31,7 @@
         <div>
           <UiFormInput
             v-model="password"
-            label="Geslo"
+            :label="$t('login-input-password-label')"
             type="password"
             name="password"
             id="password"
@@ -43,14 +42,16 @@
 
         <div class="text-sm">
           <span class="text-neutral-darkGray">
-            Še nimate računa? Registrirajte se
+            {{ $t("login-no-account-description") }}
           </span>
-          <NuxtLink to="/register" class="link">tukaj.</NuxtLink>
+          <NuxtLink :to="localPath('/register')" class="link">{{
+            $t("login-no-account-description-link")
+          }}</NuxtLink>
         </div>
       </form>
 
       <UiButton form="login_form">
-        {{ !loggingIn ? "Prijava" : "Prijavljanje..." }}
+        {{ !loggingIn ? $t("login-idle-button") : $t("login-pending-button") }}
       </UiButton>
     </div>
   </div>
@@ -59,6 +60,7 @@
 <script lang="ts" setup>
   import { loginSchema } from "~/schemas/login";
 
+  const localPath = useLocalePath();
   const { login } = useDirectusAuth();
   const router = useRouter();
 

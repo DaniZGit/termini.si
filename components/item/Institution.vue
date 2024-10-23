@@ -10,6 +10,7 @@
     >
       <NuxtImg
         :src="useAssetUrl(institution?.thumbnail?.id)"
+        placeholder="/images/placeholder.png"
         class="aspect-video w-full h-auto object-cover transition-transform duration-300"
         :class="{ 'scale-125': focus }"
       ></NuxtImg>
@@ -67,7 +68,9 @@
         @touchstart="focus = true"
         @touchend="focus = false"
       >
-        <UiButton class="w-full group">View available services</UiButton>
+        <UiButton class="w-full group">{{
+          $t("institutions-item-button-title")
+        }}</UiButton>
       </NuxtLink>
     </div>
   </div>

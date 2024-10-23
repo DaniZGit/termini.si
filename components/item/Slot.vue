@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex justify-center items-center absolute top-0 left-0 right-0 border-2 border-neutral-white text-neutral-white hover:cursor-pointer hover:border-neutral-darkGray hover:z-50"
+    class="flex justify-center items-center absolute top-0 left-0 right-0 border-2 border-neutral-white text-neutral-white hover:cursor-pointer hover:border-neutral-darkGray"
     :slot="slot?.is_reserved"
     :class="
       getSlotStatus == 'free'
@@ -26,12 +26,12 @@
     <span v-else>
       {{
         getSlotStatus == "free"
-          ? "Rezerviraj"
+          ? t("slot-status-free")
           : getSlotStatus == "user-held"
-          ? "Izbrano"
+          ? t("slot-status-user-held")
           : getSlotStatus == "user-confirmed" || getSlotStatus == "other-taken"
-          ? "Rezervirano"
-          : "Error"
+          ? t("slot-status-user-confirmed")
+          : t("slot-status-other")
       }}
     </span>
     <span class="absolute bottom-0 left-0 text-[10px] p-1">
@@ -48,6 +48,7 @@
   import type { TimetableSlot } from "~/types/misc";
 
   const cartStore = useCartStore();
+  const { t } = useI18n();
 
   const props = defineProps({
     slot: Object as PropType<TimetableSlot>,

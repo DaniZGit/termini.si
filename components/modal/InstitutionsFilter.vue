@@ -72,7 +72,10 @@
                     v-for="institution in institutions"
                     :key="institution.id"
                     :options="{
-                      title: institution.title,
+                      title: getTranslatedField(
+                        institution.translations,
+                        'title'
+                      ),
                       position: {
                         lat: institution.latitude,
                         lng: institution.longitude,
@@ -105,7 +108,12 @@
                 class="flex flex-col items-center py-2"
               >
                 <h2 class="text-secondary text-xl font-semibold text-center">
-                  {{ selectedInstitution.title }}
+                  {{
+                    getTranslatedField(
+                      selectedInstitution.translations,
+                      "title"
+                    )
+                  }}
                 </h2>
                 <span class="text-center">
                   {{ beautifyInstitutionAddress(selectedInstitution) }}

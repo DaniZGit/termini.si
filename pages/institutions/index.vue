@@ -59,7 +59,7 @@
     typeof route.query.query === "string" ? route.query.query : ""
   );
   const sort = computed(() =>
-    typeof route.query.sort === "string" ? route.query.sort : "title"
+    typeof route.query.sort === "string" ? route.query.sort : "slug"
   );
   const checkedSports = computed(() =>
     typeof route.query.sports === "object"
@@ -90,7 +90,6 @@
       readItems("institutions", {
         fields: [
           "id",
-          "title",
           "slug",
           "city.*",
           "address",
@@ -131,7 +130,7 @@
     "totalInstitutionsCount",
     () =>
       readSingleton("institutions", {
-        fields: ["title"],
+        fields: ["id"],
         filter: {
           status: {
             _eq: "published",

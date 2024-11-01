@@ -71,7 +71,10 @@
       </div>
 
       <!-- Institution description -->
-      <div v-if="institution?.content" class="grow p-4 border-2 border-primary">
+      <div
+        v-if="getTranslatedField(institution?.translations, 'content')"
+        class="grow p-4 border-2 border-primary"
+      >
         <h1 class="text-secondary text-lg font-semibold">
           {{ $t("institution-description-title") }}
         </h1>
@@ -190,8 +193,6 @@
         fields: [
           "id",
           "slug",
-          "title",
-          "content",
           "address",
           "city.*",
           "phone",

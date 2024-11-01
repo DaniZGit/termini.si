@@ -92,7 +92,6 @@
         "time_slots.time_slots_id.start_time",
         "time_slots.time_slots_id.end_time",
         "time_slots.time_slots_id.schedule_day.date",
-        "time_slots.time_slots_id.schedule_day.court.institution.title",
         "time_slots.time_slots_id.schedule_day.court.institution.city.title",
         "time_slots.time_slots_id.schedule_day.court.institution.city.postal_code",
         "time_slots.time_slots_id.schedule_day.court.institution.address",

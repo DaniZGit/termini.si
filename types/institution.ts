@@ -8,9 +8,7 @@ export type ApiInstitutionPaymentOptions = string[];
 
 export type ApiInstitution = {
   id: string;
-  title: string;
   slug: string;
-  content: string;
   city: ApiCity | null;
   address: string;
   latitude: number;

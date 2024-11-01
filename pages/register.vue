@@ -97,6 +97,11 @@
 <script lang="ts" setup>
   import { registerSchema } from "~/schemas/register";
 
+  useSeoMeta({
+    title: "Register",
+    ogTitle: "Register",
+  });
+
   const config = useRuntimeConfig();
   const router = useRouter();
   const { login } = useDirectusAuth();

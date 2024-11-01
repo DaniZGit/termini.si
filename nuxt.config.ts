@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  devtools: { enabled: false },
+  devtools: { enabled: true },
   modules: [
     "@nuxtjs/tailwindcss",
     "@vueuse/nuxt",
@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     "@pinia-plugin-persistedstate/nuxt",
     "@unlok-co/nuxt-stripe",
     "@nuxtjs/i18n",
+    "nuxt-og-image",
   ],
   runtimeConfig: {
     public: {

@@ -145,6 +145,11 @@
   import type { ApiReservation } from "~/types/reservation";
   import type { ApiTransaction } from "~/types/transaction";
 
+  useSeoMeta({
+    title: "Profile",
+    ogTitle: "Profile",
+  });
+
   const { user } = useDirectusAuth();
   const { readItems, readSingleton } = useDirectusItems();
   const limit = 4;

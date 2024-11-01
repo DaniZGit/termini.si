@@ -60,6 +60,11 @@
 </template>
 
 <script lang="ts" setup>
+  useSeoMeta({
+    title: "Tokens",
+    ogTitle: "Tokens",
+  });
+
   const localPath = useLocalePath();
   const tokens = ref<number>();
 

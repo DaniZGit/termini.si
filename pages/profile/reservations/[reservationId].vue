@@ -127,6 +127,11 @@
 <script lang="ts" setup>
   import type { ApiReservation } from "~/types/reservation";
 
+  useSeoMeta({
+    title: "Reservations",
+    ogTitle: "Reservations",
+  });
+
   const route = useRoute();
   const { readItem } = useDirectusItems();
   const { user } = useDirectusAuth();

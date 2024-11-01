@@ -36,6 +36,11 @@
 </template>
 
 <script lang="ts" setup>
+  useSeoMeta({
+    title: "Services",
+    ogTitle: "Services",
+  });
+
   const localPath = useLocalePath();
 
   const services = [

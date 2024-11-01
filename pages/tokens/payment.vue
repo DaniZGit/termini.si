@@ -141,6 +141,11 @@
 <script lang="ts" setup>
   import type { StripeElements, Stripe } from "@stripe/stripe-js";
 
+  useSeoMeta({
+    title: "Payment",
+    ogTitle: "Payment",
+  });
+
   const route = useRoute();
   const config = useRuntimeConfig();
   const showTerms = ref(false);

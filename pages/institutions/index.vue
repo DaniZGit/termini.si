@@ -46,6 +46,10 @@
   import type { ApiInstitution } from "~/types/institution";
   import type { InstitutionsFilter } from "~/types/misc";
 
+  useSeoMeta({
+    title: "Institutions",
+  });
+
   const { readItems, readSingleton } = useDirectusItems();
   const {} = useDirectusRevisions();
   const route = useRoute();

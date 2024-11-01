@@ -129,6 +129,11 @@
 </template>
 
 <script lang="ts" setup>
+  useSeoMeta({
+    title: "Termini",
+    ogTitle: "Termini",
+  });
+
   const { login, user } = useDirectusAuth();
   const onLogin = async () => {
     try {

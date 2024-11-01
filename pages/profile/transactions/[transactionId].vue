@@ -66,6 +66,11 @@
 <script lang="ts" setup>
   import type { ApiTransaction } from "~/types/transaction";
 
+  useSeoMeta({
+    title: "Transactions",
+    ogTitle: "Transactions",
+  });
+
   const route = useRoute();
   const { readItem } = useDirectusItems();
 

@@ -60,6 +60,11 @@
 <script lang="ts" setup>
   import { loginSchema } from "~/schemas/login";
 
+  useSeoMeta({
+    title: "Login",
+    ogTitle: "Login",
+  });
+
   const localPath = useLocalePath();
   const { login } = useDirectusAuth();
   const router = useRouter();

@@ -561,6 +561,20 @@
       cartStore.addToCartStatus != "pending" &&
       cartStore.slots.length == cartStore.ogSlots.length
   );
+
+  useSeoMeta({
+    title:
+      getTranslatedField(institution.value?.translations, "title") ??
+      (route.params.slug as string),
+    ogTitle:
+      getTranslatedField(institution.value?.translations, "title") ??
+      (route.params.slug as string),
+    description:
+      getTranslatedField(institution.value?.translations, "content") ?? "",
+    ogDescription:
+      getTranslatedField(institution.value?.translations, "content") ?? "",
+    ogImage: useAssetUrl(institution.value?.thumbnail?.id),
+  });
 </script>
 
 <style></style>

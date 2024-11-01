@@ -21,7 +21,7 @@
         class="overflow-hidden"
       >
         <h3 class="text-xl font-semibold text-secondary">
-          {{ institution.title }}
+          {{ getTranslatedField(institution.translations, "title") }}
         </h3>
       </NuxtLink>
       <div>

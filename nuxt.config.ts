@@ -61,15 +61,17 @@ export default defineNuxtConfig({
     locales: [
       {
         code: "sl",
+        language: "sl-SI",
         file: "sl-SI.json",
       },
       {
         code: "en",
+        language: "en-US",
         file: "en-US.json",
       },
     ],
     langDir: "lang",
-    defaultLocale: "sl", // default locale of your project for Nuxt pages and routings
+    defaultLocale: "en", // default locale of your project for Nuxt pages and routings
   },
   build: {
     transpile: ["@vuepic/vue-datepicker"],

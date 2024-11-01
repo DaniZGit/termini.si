@@ -2,7 +2,7 @@
   <div class="bg-neutral-white">
     <div class="text-center px-4 py-4">
       <h1 class="text-3xl font-semibold text-secondary">
-        {{ institution?.title }}
+        {{ getTranslatedField(institution?.translations, "title") }}
       </h1>
     </div>
 
@@ -76,7 +76,7 @@
           {{ $t("institution-description-title") }}
         </h1>
         <div
-          v-html="institution?.content"
+          v-html="getTranslatedField(institution?.translations, 'content')"
           class="rte text-neutral-darkGray"
         ></div>
       </div>
@@ -199,6 +199,7 @@
           "display_type",
           "payment_options",
           "images.directus_files_id.*",
+          "translations.*",
         ],
         filter: {
           slug: {

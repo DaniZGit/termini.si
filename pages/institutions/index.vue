@@ -93,6 +93,7 @@
           "phone",
           "thumbnail.*",
           "services.type",
+          "translations.*",
         ],
         filter: {
           status: {

@@ -1,3 +1,3 @@
 # Page for booking slots
 
-[Live page]([https://nuxt.com/docs/getting-started/introduction](https://termini-si.vercel.app/))
+Check the [Live page]([https://termini-si.vercel.app/]), mobile view looks the best.
